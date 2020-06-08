@@ -13,7 +13,7 @@ const authRouter = require('./routes/auth')
 
 const pre_populate = require('./dummy-data/pre_populate')
 mongoose
-    .connect('mongodb+srv://db_admin:5lSNmAvgkCOYIVgS@tclone.xuxmv.mongodb.net/test?retryWrites=true&w=majority', {
+    .connect(process.env.MONGO_URL || 'mongodb://localhost/test', {
         useNewUrlParser: true,
         useUnifiedTopology: true,
         useCreateIndex: true,
@@ -55,7 +55,7 @@ app.use(compression());
 app.use(express.json());
 app.use(express.urlencoded({ extended: false }));
 app.use(cookieParser());
-app.use(express.static(path.join(__dirname, '..', 'build')));
+// app.use(express.static(path.join(__dirname, 'public')));
 
 app.use(passport.initialize());
 app.use(passport.session());

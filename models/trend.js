@@ -29,6 +29,4 @@ const trendSchema = mongoose.Schema({
         }
     }]
 })
-
-
 module.exports = mongoose.model('Trend', trendSchema)

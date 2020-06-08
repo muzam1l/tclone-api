@@ -9,8 +9,8 @@ const Post = require('../models/post')
 const Trend = require('../models/trend')
 const User = require('../models/user')
 const passport = require('passport')
-const { ensureLoggedIn } = require('./middlewares')
-const { filterInput } = require('./helpers')
+const { ensureLoggedIn } = require('../middlewares')
+const { filterInput } = require('../helpers')
 /* GET home page. */
 router.get('/home_timeline', ensureLoggedIn, async (req, res) => {
   try {
@@ -91,8 +91,13 @@ router.get('/search', async (req, res) => {
       return;
     }
     else if (query.startsWith('@')) {
-      // Ndpot implemented
-      res.json({ posts: [] });
+      // posts containing @query or accounts matching query
+      let posts = await Post.searchUserMention(query);
+      let users = await User.searchUser(query);
+      res.json({
+        posts,
+        users
+      })
       return;
     }
     else {

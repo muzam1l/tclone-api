@@ -2,7 +2,7 @@ var express = require('express');
 var router = express.Router();
 const passport = require('passport')
 const User = require('../models/user')
-const { ensureLoggedIn } = require('./middlewares')
+const { ensureLoggedIn } = require('../middlewares')
 
 router.post('/login', passport.authenticate('local'), async (req, res) => {
     try {
@@ -41,7 +41,7 @@ router.get('/logout', (req, res) => {
         res.redirect('/')
     })
 })
-const { filterInput } = require('./helpers')
+const { filterInput } = require('../helpers')
 router.post('/signup', async (req, res) => {
     try {
         let { password, fullname, username } = req.body;

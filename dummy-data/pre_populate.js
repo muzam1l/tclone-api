@@ -3,10 +3,10 @@ const assert = require('assert')
 const User = require('../models/user')
 const Post = require('../models/post')
 const Trend = require('../models/trend')
+const Hashtag = require('../models/hashtag')
 const home_timeline = require('../models/home_timeline')
 
 const dummy_timeline = require('./home_timeline.json')
-const dummy_trends = require('./trends.json')
 async function pre_populate() {
     assert(mongoose.connection.readyState, 1, 'Database not connected');
     try {
@@ -40,8 +40,21 @@ async function pre_populate() {
             // list_tobe_friend_ids = tobe_friend_ids.map(obj => obj._id);
             // user.follow(...list_tobe_friend_ids); //await omitted
         }
-        await Trend.insertMany(dummy_trends);
-        //TOBE removed soon
+        let trends = await Hashtag.find({}).sort('-tweet_volume').limit(20);
+        trends = trends.map(obj => ({
+            name: obj.name,
+            tweet_volume: obj.tweet_volume,
+            query: encodeURIComponent(obj.name)
+        }))
+        await Trend.create({
+            "trends": trends,
+            "locations": [
+                {
+                    "name": "Worldwide",
+                    "woeid": 1
+                }
+            ]
+        });
     } catch (error) {
         console.error('error populating:', error)
     } finally {

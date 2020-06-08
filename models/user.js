@@ -123,6 +123,14 @@ userSchema.methods.follow = async function (...list_id_tobe_friends) {
     }
 
 }
+userSchema.statics.searchUser = function (query) {
+    return this.find({
+        $or: [
+            { screen_name: query },
+            { name: query }
+        ]
+    }).limit(20);
+}
 
 userSchema.statics.getSuggestions = async function ({
     //username: screen_name = null,

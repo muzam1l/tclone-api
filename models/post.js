@@ -2,6 +2,7 @@ const mongoose = require('mongoose')
 require('mongoose-long')(mongoose)
 const internal_setting = require('../models/internal_setting')
 const User = require('./user')
+const Hashtag = require('./hashtag')
 
 const postSchema = mongoose.Schema({
     "created_at": { type: Date, default: Date.now },   //"Thu Apr 30 12:11:23 +0000 2020",
@@ -89,13 +90,28 @@ postSchema.statics.searchHashtag = async function (query) {
             strength: 2
         })
         .sort('-created_at')
+        .limit(20)
         .populate('user');
+}
+postSchema.statics.searchUserMention = async function (query) {
+    if (query.startsWith('@'))
+        query = query.slice(1);
+    return this.find({
+        $or: [
+            { 'entities.user_mentions.screen_name': query },
+            { 'entities.user_mentions.name': query }
+        ]
+    }).collation({
+        locale: 'en',
+        strength: 2
+    }).sort('-created_at').limit(20).populate('user');
 }
 postSchema.statics.searchText = async function (query) {
     return this.find(
         { $text: { $search: query } },
         { score: { $meta: "textScore" } }
     ).sort({ score: { $meta: 'textScore' } })
+        .limit(20)
         .populate('user')
 }
 
@@ -132,7 +148,7 @@ postSchema.post('save', async (doc) => {
                 entities.hashtags.push({
                     text: match[0].slice(1),
                     indices: [match.index, match[0].length]
-                })
+                });
             }
             let mentions = text.matchAll(/@\w+/);
             for (let match of mentions) {
@@ -141,9 +157,9 @@ postSchema.post('save', async (doc) => {
                 entities.user_mentions.push({
                     screen_name: screen_name,
                     indices: [match.index, match[0].length],
-                    name: user.name,
-                    id: user.id,
-                    id_str: user.id_str,
+                    name: user ? user.name : undefined,
+                    id: user ? user.id : undefined,
+                    id_str: user ? user.id_str : undefined,
                 })
             }
             await mongoose.model('Post').updateOne({ _id: doc._id }, {
@@ -153,7 +169,13 @@ postSchema.post('save', async (doc) => {
     } catch (err) {
         console.log('parsing error:', err)
     }
-    // see if contries to trend
+    // put hashtag to trends (hashtag collection actually)
+    let names = doc.entities.hashtags.map(obj => obj.text);
+    names.forEach(async name => {
+        await Hashtag.updateOne({ name: '#' + name }, {
+            $inc: { tweet_volume: 1 }
+        }, { upsert: true });
+    });
 });
 
 module.exports = mongoose.model('Post', postSchema);
