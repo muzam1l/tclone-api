@@ -20,7 +20,7 @@ authSchema.statics.validPassword = async function (user_id, password) {
 }
 authSchema.statics.createNew = async function (user_id, authDat) {
     let password = authDat.password;
-    if (!password && password.lenght === 0) {
+    if (!password && password.length === 0) {
         throw Error('password required for auth.createNew')
     }
     let passwordHash = await bcrypt.hash(password, 10) //auto gens salt
