@@ -173,7 +173,8 @@ userSchema.post('save', async (doc, next) => {
     }
     next();
 });
-userSchema.post('save', (doc) => {
+const { getRandomProfileUrl } = require('../helpers')
+userSchema.post('save', async doc => {
     // make empty timeline
     home_timeline.create({
         user_id: doc._id,
@@ -182,6 +183,12 @@ userSchema.post('save', (doc) => {
         user_id: doc._id,
         friend_ids: [doc._id]
     })
+    if (!doc.profile_image_url_https) {
+        await mongoose.model('User').updateOne({ _id: doc._id }, {
+            profile_image_url_https: getRandomProfileUrl(),
+            default_profile_image: false
+        })
+    }
 });
 
 module.exports = mongoose.model('User', userSchema)

@@ -39,4 +39,29 @@ function filterInput(input, type = 'custom', {
     }
     return escapeHtml(input);
 }
+function getRandomProfileUrl() {
+    //geneartes random pic in img
+    let imgs = [
+        'animals-1298747.svg',
+        'bunny-155674.svg',
+        'cat-154642.svg',
+        'giraffe-2521453.svg',
+        'iron-man-3829039.svg',
+        'ironman-4454663.svg',
+        'lion-2521451.svg',
+        'man-1351317.svg',
+        'pumpkin-1640465.svg',
+        'rat-152162.svg',
+        'sherlock-3828991.svg',
+        'spider-man-4639214.svg',
+        'spiderman-5247581.svg',
+        'thor-3831290.svg',
+        'tiger-308768.svg',
+        'whale-36828.svg'
+    ]
+    let img = imgs[Math.floor(Math.random() * imgs.length)];
+    return `https://tclone-api.herokuapp.com/img/${img}`
+}
+
 exports.filterInput = filterInput;
+exports.getRandomProfileUrl = getRandomProfileUrl;
