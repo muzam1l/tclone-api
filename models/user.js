@@ -143,7 +143,7 @@ userSchema.statics.getSuggestions = async function ({
     return this.find({
         _id: { $ne: user_id },
         _id: { $nin: friend_ids }
-    }).sort('-followers_count').limit(20);
+    }).sort('-followers_count -created_at').limit(25);
 }
 
 async function user_genId() {
