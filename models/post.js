@@ -3,6 +3,7 @@ require('mongoose-long')(mongoose)
 const internal_setting = require('../models/internal_setting')
 const User = require('./user')
 const Hashtag = require('./hashtag')
+const home_timeline = require('./home_timeline')
 
 const postSchema = mongoose.Schema({
     "created_at": { type: Date, default: Date.now },   //"Thu Apr 30 12:11:23 +0000 2020",
@@ -126,7 +127,7 @@ async function post_genId() {
     let { current_post_id } = await internal_setting.findOne({ ver: '1.0' }, 'current_post_id');
     return current_post_id;
 }
-postSchema.post('save', async (doc) => {
+postSchema.post('save', async (doc, next) => {
 
     //update statuses_count in User
     await mongoose.model('User').findOneAndUpdate({ _id: doc.user }, {
@@ -136,13 +137,14 @@ postSchema.post('save', async (doc) => {
     let quer = await mongoose.model('Friendship').findOne({ user_id: doc.user }, 'friend_ids');
     if (quer) {
         await mongoose.model('home_timeline')
-            .bulkAddPosts(quer.friend_ids, doc.user, doc._id);
+            .bulkAddPosts(quer.friend_ids, { id_post_added: doc._id });
     }
+    let entities = { hashtags: [], user_mentions: [] };
     try {
         // parse post
         if (doc.entities.hashtags.length === 0 && doc.entities.user_mentions.length === 0) {
             let text = doc.text;
-            let entities = { hashtags: [], user_mentions: [] }
+            // Parse #hastag
             let hashes = text.matchAll(/#\w+/);
             for (let match of hashes) {
                 entities.hashtags.push({
@@ -150,6 +152,7 @@ postSchema.post('save', async (doc) => {
                     indices: [match.index, match[0].length]
                 });
             }
+            // parse username
             let mentions = text.matchAll(/@\w+/);
             for (let match of mentions) {
                 let screen_name = match[0].slice(1);
@@ -166,13 +169,25 @@ postSchema.post('save', async (doc) => {
                 $set: { entities: entities },
             })
         }
+        else {
+            entities = doc.entities;
+        }
     } catch (err) {
         console.log('parsing error:', err)
     }
+    // add to timeline of mentioned users
+    entities.user_mentions.forEach(async mention => {
+        if (!mention.id)
+            return
+        let user = await User.findOne({ id: mention.id }, '_id');
+        if (user) {
+            await home_timeline.bulkAddPosts([user._id], { id_post_added: doc._id });
+        }
+    })
     // put hashtag to trends (hashtag collection actually)
-    let names = doc.entities.hashtags.map(obj => obj.text);
+    let names = entities.hashtags.map(obj => obj.text);
     names.forEach(async name => {
-        await Hashtag.updateOne({ name: '#' + name }, {
+        let res = await Hashtag.updateOne({ name: '#' + name }, {
             $inc: { tweet_volume: 1 }
         }, { upsert: true });
     });

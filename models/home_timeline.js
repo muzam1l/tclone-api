@@ -59,15 +59,20 @@ timelineSchema.statics.bulkAddPosts = async function (user_ids, ...args) {
     timelines //forEach does parallelly (unlike for of)
         .forEach(timeline => timeline.bulkAddPosts(...args))
 }
-timelineSchema.methods.bulkAddPosts = async function (id_friend_added, id_post_added) {
-    /**
-     * updates the timeline of user with posts from friends_added
-     * updates all posts if id_post_added not given
-     * @param id_post_added - id of post added by friend recently
-     * @param id_friend_added - id of friend added recently, can be null if id_post_added present
-     */
+/**
+ * bulkAddposts
+ * 
+* updates the timeline of user with posts from friends_added
+* updates all posts if id_post_added not given
+* @param {Object} _ id_of_post added or id_of_friend added
+* @returns res - result of update command
+*/
+timelineSchema.methods.bulkAddPosts = async function ({
+    id_friend_added = null,
+    id_post_added = null
+}) {
     let posts_toadd;
-    if (id_friend_added && !id_post_added) { //new friend add all posts
+    if (id_friend_added) { //new friend add all posts
         posts_toadd = await mongoose.model('Post').find({
             user: id_friend_added,
             //TODO maybe limit posts when they are too many
@@ -93,6 +98,7 @@ timelineSchema.methods.bulkAddPosts = async function (id_friend_added, id_post_a
             }
         }
     })
+    return res;
 }
 
 module.exports = mongoose.model('home_timeline', timelineSchema)

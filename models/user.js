@@ -111,8 +111,8 @@ userSchema.methods.follow = async function (...list_id_tobe_friends) {
 
             for (let id of list_id_tobe_friends) {
                 await home_timeline
-                    .bulkAddPosts([this._id], id);
-                //                  user_ids  id_friend_added
+                    .bulkAddPosts([this._id], { id_friend_added: id });
+                //                  user_ids 
             }
         }
         res = { ...res1 };
@@ -143,7 +143,7 @@ userSchema.statics.getSuggestions = async function ({
     return this.find({
         _id: { $ne: user_id },
         _id: { $nin: friend_ids }
-    }).sort('-followers_count -created_at').limit(25);
+    }).sort('-followers_count').limit(20);
 }
 
 async function user_genId() {
