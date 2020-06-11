@@ -124,6 +124,9 @@ userSchema.methods.follow = async function (...list_id_tobe_friends) {
 
 }
 userSchema.statics.searchUser = function (query) {
+    if (query.startsWith('@'))
+        query = query.slice(1)
+    query = new RegExp(query, "i");
     return this.find({
         $or: [
             { screen_name: query },
@@ -143,7 +146,7 @@ userSchema.statics.getSuggestions = async function ({
     return this.find({
         _id: { $ne: user_id },
         _id: { $nin: friend_ids }
-    }).sort('-followers_count').limit(20);
+    }).sort('-followers_count').limit(25);
 }
 
 async function user_genId() {

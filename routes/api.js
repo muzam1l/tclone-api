@@ -71,11 +71,7 @@ router.all('/follow/:username', ensureLoggedIn, async (req, res) => {
 /* GET seach results */
 router.get('/search', async (req, res) => {
   let query = req.query['q'];
-  let page = req.query['p']
-  if (parseInt(page) > 1) {
-    res.json({ posts: null, done: true })
-    return
-  }
+  let page = req.query['p'];
   if (!query) {
     res.json({
       posts: null
@@ -83,16 +79,17 @@ router.get('/search', async (req, res) => {
     return
   }
   try {
+    page = parseInt(page);
     if (query.startsWith('#')) {
       // posts containing hashtag
-      let result = await Post.searchHashtag(query);
+      let result = await Post.searchHashtag(query, page);
       //result direct return of find (empty array when no match)
       res.json({ posts: result });
       return;
     }
     else if (query.startsWith('@')) {
       // posts containing @query or accounts matching query
-      let posts = await Post.searchUserMention(query);
+      let posts = await Post.searchUserMention(query, page);
       let users = await User.searchUser(query);
       res.json({
         posts,
@@ -102,7 +99,7 @@ router.get('/search', async (req, res) => {
     }
     else {
       //do a text search
-      let result = await Post.searchText(query);
+      let result = await Post.searchText(query, page);
       //result is direct return of find()
       res.json({ posts: result });
     }

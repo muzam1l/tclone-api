@@ -82,7 +82,8 @@ postSchema.statics.addOne = async function ({
         id_str: id.toString()
     })
 }
-postSchema.statics.searchHashtag = async function (query) {
+postSchema.statics.searchHashtag = async function (query, page = 1) {
+    page = parseInt(page);
     if (query.startsWith('#'))
         query = query.slice(1)
     return this.find({ 'entities.hashtags.text': query })
@@ -91,10 +92,12 @@ postSchema.statics.searchHashtag = async function (query) {
             strength: 2
         })
         .sort('-created_at')
+        .skip(20 * (page - 1))
         .limit(20)
         .populate('user');
 }
-postSchema.statics.searchUserMention = async function (query) {
+postSchema.statics.searchUserMention = async function (query, page = 1) {
+    page = parseInt(page);
     if (query.startsWith('@'))
         query = query.slice(1);
     return this.find({
@@ -105,13 +108,18 @@ postSchema.statics.searchUserMention = async function (query) {
     }).collation({
         locale: 'en',
         strength: 2
-    }).sort('-created_at').limit(20).populate('user');
+    }).sort('-created_at')
+        .skip(20 * (page - 1))
+        .limit(20)
+        .populate('user');
 }
-postSchema.statics.searchText = async function (query) {
+postSchema.statics.searchText = async function (query, page = 1) {
+    page = parseInt(page);
     return this.find(
         { $text: { $search: query } },
         { score: { $meta: "textScore" } }
     ).sort({ score: { $meta: 'textScore' } })
+        .skip(20 * (page - 1))
         .limit(20)
         .populate('user')
 }
