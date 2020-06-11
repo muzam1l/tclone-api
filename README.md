@@ -38,7 +38,7 @@ Some data (tweets and users) is fed into database at server-start to get a bunch
 
 ### ⚡ Trend Analysis ⚡
 
-Each post added to database is parsed for any #hastags or @user_mentions. These hashtags (along with storing in `Post.entities`) is stored in hashtags collection (Hashtag model) along with number of times it has been posted. From there Trending hashtags can be retrieved as simply the ones with highest post volume (currently this done at only the `pre_populating` step so trends are not real time).
+Each post added to database is parsed for any #hastags or @user_mentions. These hashtags (along with storing in `Post.entities`) is stored in hashtags collection (Hashtag model) along with number of times it has been posted. From there Trending hashtags are retrieved as simply the ones with highest post volume . Selecting these highest volume hastags is done at a interval of (currently) 30 seconds, therefore trends are upadted realtime to what users are posting.
 
 ### ⚡ Search ⚡
 
