@@ -59,6 +59,7 @@ const postSchema = mongoose.Schema({
     "retweeted": { type: Boolean, default: false },
     "lang": { type: String, default: null }
 })
+let sPage = 15
 /**
 * addes a post for specific user
 * @param {String} username - screen_name of user
@@ -92,8 +93,8 @@ postSchema.statics.searchHashtag = async function (query, page = 1) {
             strength: 2
         })
         .sort('-created_at')
-        .skip(20 * (page - 1))
-        .limit(20)
+        .skip(sPage * (page - 1))
+        .limit(sPage)
         .populate('user');
 }
 postSchema.statics.searchUserMention = async function (query, page = 1) {
@@ -109,8 +110,8 @@ postSchema.statics.searchUserMention = async function (query, page = 1) {
         locale: 'en',
         strength: 2
     }).sort('-created_at')
-        .skip(20 * (page - 1))
-        .limit(20)
+        .skip(sPage * (page - 1))
+        .limit(sPage)
         .populate('user');
 }
 postSchema.statics.searchText = async function (query, page = 1) {
@@ -119,8 +120,25 @@ postSchema.statics.searchText = async function (query, page = 1) {
         { $text: { $search: query } },
         { score: { $meta: "textScore" } }
     ).sort({ score: { $meta: 'textScore' } })
-        .skip(20 * (page - 1))
-        .limit(20)
+        .skip(sPage * (page - 1))
+        .limit(sPage)
+        .populate('user')
+}
+postSchema.statics.getUserTimeline = async function ({
+    username: screen_name = null,
+    user_id = null
+}, page = 1) {
+    if (!user_id) {
+        let { _id } = await mongoose.model("User").findOne({ screen_name: screen_name }, "_id")
+        if (!_id)
+            throw Error('Cannot find User')
+        user_id = _id
+    }
+    return this.find({
+        user: user_id
+    }).sort("-created_at")
+        .skip(sPage * (page - 1))
+        .limit(sPage)
         .populate('user')
 }
 

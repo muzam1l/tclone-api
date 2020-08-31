@@ -121,8 +121,40 @@ userSchema.methods.follow = async function (...list_id_tobe_friends) {
     } finally {
         return res;
     }
-
 }
+/**
+ * unfollow() similar to follow()
+ */
+userSchema.methods.unfollow = async function (...list_id_tobe_not_friends) {
+    let res = { ok: 0 };
+    try {
+        let res1 = await Friendship.updateOne({ user_id: this._id }, {
+            $pull: {
+                friend_ids: {
+                    $in: list_id_tobe_not_friends
+                }
+            }
+        }, { upsert: true });
+        if (res1.ok) {
+            this.update({
+                $inc: { friends_count: -1 }
+            }) //await omitted
+
+            // remove posts from home_timeline
+            for (let id of list_id_tobe_not_friends) {
+                await home_timeline
+                    .bulkRemovePosts([this._id], { id_friend_removed: id });
+                //                  user_ids 
+            }
+        }
+        res = { ...res1 };
+    } catch (err) {
+        console.log('error in user.unfollow()', err)
+    } finally {
+        return res;
+    }
+}
+
 userSchema.statics.searchUser = function (query) {
     if (query.startsWith('@'))
         query = query.slice(1)
@@ -146,7 +178,7 @@ userSchema.statics.getSuggestions = async function ({
     return this.find({
         _id: { $ne: user_id },
         _id: { $nin: friend_ids }
-    }).sort('-followers_count').limit(25);
+    }).sort('-followers_count -created_at').limit(25);
 }
 
 async function user_genId() {

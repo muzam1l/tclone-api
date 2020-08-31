@@ -23,7 +23,7 @@ router.get('/home_timeline', ensureLoggedIn, async (req, res) => {
       posts //posts: null or empty when exhausts
     })
   } catch (err) {
-    console.error('error in /home_timeline')
+    console.error('error in /home_timeline', err)
     res.status(500).send("internel server error");
   }
 });
@@ -36,7 +36,7 @@ router.post('/post', ensureLoggedIn, async (req, res) => {
     let pst = await Post.addOne({ user_id: user._id }, req.body)
     res.status(200).json({
       'msg': 'post was succesfully added',
-      'post': pst.populate('user').execPopulate(),
+      'post': await pst.populate('user').execPopulate(),
     });
   } catch (err) {
     console.error('error in /posts/new', err)
@@ -44,11 +44,40 @@ router.post('/post', ensureLoggedIn, async (req, res) => {
   }
 });
 
+/* GET get a single post. */
+router.get('/post/:postId', async (req, res) => {
+  let postId = req.params.postId;
+  try {
+    let post = await Post.findOne({ id_str: postId })
+    if (!post) {
+      res.status(400).json({ msg: "Bad request" })
+      return
+    }
+    res.status(200).json({
+      post: await post.populate('user').execPopulate()
+    });
+  } catch (err) {
+    res.status(500).json({ msg: 'Something went wrong' })
+  }
+});
+/* GET get a single user detail. */
+router.get('/user/:username', async (req, res) => {
+  let username = req.params.username;
+  try {
+    username = filterInput(username, 'username');
+    let user = await User.findOne({ screen_name: username })
+    res.status(200).json({
+      user
+    });
+  } catch (err) {
+    res.status(500).json({ msg: 'Something went wrong' })
+  }
+});
+
 router.all('/follow/:username', ensureLoggedIn, async (req, res) => {
   try {
     let username = req.params.username;
     username = filterInput(username, 'username');
-    console.log(username)
     let user = await User.findOne({ screen_name: username }, '_id');
     if (!user)
       throw Error('username does not exist');
@@ -61,10 +90,54 @@ router.all('/follow/:username', ensureLoggedIn, async (req, res) => {
       message: 'success'
     })
   } catch (err) {
-    //console.log('error in /follow/', err)
+    console.log('error in /follow/', err)
     res.status(400).json({
-      message: 'user doesnt exist or bad request'
+      message: 'bad request'
     })
+  }
+})
+router.all('/unfollow/:username', ensureLoggedIn, async (req, res) => {
+  try {
+    let username = req.params.username;
+    username = filterInput(username, 'username');
+    let user = await User.findOne({ screen_name: username }, '_id');
+    if (!user)
+      throw Error('username does not exist');
+    let req_user = await User.findById(req.user._id);
+    let responce = await req_user.unfollow(user._id);
+    if (!responce.ok) {
+      throw Error('user.unfollow responce not ok');
+    }
+    res.json({
+      message: 'success'
+    })
+  } catch (err) {
+    console.log('error in /unfollow/', err)
+    res.status(400).json({
+      message: 'bad request'
+    })
+  }
+})
+/* GET user timeline */
+router.get('/user_timeline/:username', async (req, res) => {
+  let page = req.query['p'];
+  let username = req.params.username;
+  try {
+    page = parseInt(page);
+    username = filterInput(username, 'username');
+    let user = await User.findOne({ screen_name: username })
+    if (!user) {
+      res.status(400).json({ message: "Bad request" })
+      return
+    }
+    let posts = await Post.getUserTimeline({ user_id: user._id }, page)
+    res.json({
+      posts,
+      user
+    })
+  } catch (err) {
+    console.log('error in /user_timeline: ', err)
+    res.status(500).json({ msg: "Something went wrong" })
   }
 })
 
@@ -105,7 +178,7 @@ router.get('/search', async (req, res) => {
     }
   } catch (err) {
     console.log('error in /search:', err)
-    res.status(500).send('internal server error')
+    res.status(500).json({ msg: "Something went wrong" })
   }
 })
 
@@ -118,7 +191,7 @@ router.get('/trends', async (req, res) => {
 
   } catch (error) {
     console.log('error in /trends', error);
-    res.status(500).send('Internal server error');
+    res.status(500).json({ msg: "Something went wrong" })
   }
 })
 
@@ -127,14 +200,19 @@ router.get('/users', ensureLoggedIn, async (req, res) => {
   let user = req.user;
   assert.ok(user)
   try {
-    let result = await User.getSuggestions({ user_id: user._id });
+    let users = await User.getSuggestions({ user_id: user._id });
+    // TODO find better way to do this
+    users = users.map(user => ({
+      ...user._doc,
+      following: false
+    }))
     res.json({
-      users: result,
+      users,
       more: false
     })
   } catch (err) {
     console.log('error in /users', err);
-    res.status(500).send('Internal server error')
+    res.status(500).json({ msg: "Something went wrong" })
   }
 })
 
