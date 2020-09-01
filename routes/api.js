@@ -1,6 +1,6 @@
 var express = require('express');
 var router = express.Router();
-var { io } = require('../socketApi')
+// var { io } = require('../socketApi')
 const mongoose = require('mongoose');
 const assert = require('assert');
 
@@ -8,12 +8,12 @@ const home_timeline = require('../models/home_timeline')
 const Post = require('../models/post')
 const Trend = require('../models/trend')
 const User = require('../models/user')
-const passport = require('passport')
+// const passport = require('passport')
 const { ensureLoggedIn } = require('../utils/middlewares')
 const { filterInput } = require('../utils/helpers')
 const {
-  serialisePosts,
-  serialisePost,
+  serializePosts,
+  serializePost,
   serializeUser,
   serializeUsers
 } = require('../utils/serializers')
@@ -25,7 +25,7 @@ router.get('/home_timeline', ensureLoggedIn, async (req, res) => {
     assert.ok(user);
     let page = req.query['p'];
     let posts = /*list*/await home_timeline.getTimeline({ user_id: user._id }, page);
-    posts = await serialisePosts(posts, req.user)
+    posts = await serializePosts(posts, req.user)
     res.json({
       posts //posts: null or empty when exhausts
     })
@@ -42,7 +42,7 @@ router.post('/post', ensureLoggedIn, async (req, res) => {
   try {
     let post = await Post.addOne({ user_id: user._id }, req.body)
     post = await pst.populate('user').execPopulate()
-    post = await serialisePost(post, req.user)
+    post = await serializePost(post, req.user)
     res.status(200).json({
       'msg': 'post was succesfully added',
       post
@@ -64,7 +64,7 @@ router.get('/post/:postId', async (req, res) => {
       return
     }
     post = await post.populate('user').execPopulate()
-    post = await serialisePost(post, req.user)
+    post = await serializePost(post, req.user)
     res.status(200).json({
       post
     });
@@ -145,7 +145,7 @@ router.get('/user_timeline/:username', async (req, res) => {
       return
     }
     let posts = await Post.getUserTimeline({ user_id: user._id }, page)
-    posts = await serialisePosts(posts, req.user)
+    posts = await serializePosts(posts, req.user)
     user = await serializeUser(user, req.user)
     res.json({
       posts,
@@ -173,7 +173,7 @@ router.get('/search', async (req, res) => {
       // posts containing hashtag
       let result = await Post.searchHashtag(query, page);
       //result direct return of find (empty array when no match)
-      posts = await serialisePosts(result, req.user)
+      posts = await serializePosts(result, req.user)
       res.json({ posts });
       return;
     }
@@ -181,8 +181,8 @@ router.get('/search', async (req, res) => {
       // posts containing @query or accounts matching query
       let posts = await Post.searchUserMention(query, page);
       let users = await User.searchUser(query);
-      posts = await serialisePosts(posts, req.user)
-      users = await serialisePost(users, req.user)
+      posts = await serializePosts(posts, req.user)
+      users = await serializeUsers(users, req.user)
       res.json({
         posts,
         users
@@ -193,7 +193,7 @@ router.get('/search', async (req, res) => {
       //do a text search
       let result = await Post.searchText(query, page);
       //result is direct return of find()
-      posts = await serialisePosts(result, req.user)
+      posts = await serializePosts(result, req.user)
       res.json({ posts });
     }
   } catch (err) {

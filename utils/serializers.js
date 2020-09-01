@@ -21,24 +21,24 @@ exports.serializeUsers = async (users = [], client) => {
         throw Error("Unknown type")
     return Promise.all(users.map(user => this.serializeUser(user, client)))
 }
-exports.serialisePost = async (post, client) => {
+exports.serializePost = async (post, client) => {
     if (!post)
         return
     if (post instanceof Document)
         post = post.toObject()
     if (!post.user)
         throw Error("Post doesnt have a user field")
-    //serialise user field
+    //serialize user field
     post.user = await this.serializeUser(post.user, client)
-    //serialise post if necessary
+    //serialize post if necessary
     return ({
         ...post //no serialisation for now
     })
 }
-exports.serialisePosts = async (posts = [], client) => {
+exports.serializePosts = async (posts = [], client) => {
     if (posts.toObject)
         posts = posts.toObject()
     if (!posts instanceof Array)
         throw Error("Unknown type")
-    return Promise.all(posts.map(post => this.serialisePost(post, client)))
+    return Promise.all(posts.map(post => this.serializePost(post, client)))
 }
