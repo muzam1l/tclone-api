@@ -15,4 +15,16 @@ const friendshipSchema = mongoose.Schema({
         ref: 'User'
     }]
 })
+/**
+ * checks if user1 is following user2
+ * @param {*} user1_id 
+ * @param {*} user2_id 
+ */
+friendshipSchema.statics.isFollowing = async function (user1_id, user2_id) {
+    return this.exists({
+        user_id: user1_id,
+        friend_ids: user2_id
+    })
+}
+
 module.exports = mongoose.model('Friendship', friendshipSchema)

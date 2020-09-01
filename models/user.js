@@ -178,7 +178,7 @@ userSchema.statics.getSuggestions = async function ({
     return this.find({
         _id: { $ne: user_id },
         _id: { $nin: friend_ids }
-    }).sort('-followers_count -created_at').limit(25);
+    }).sort('-followers_count -statuses_count -created_at').limit(25);
 }
 
 async function user_genId() {
@@ -208,7 +208,7 @@ userSchema.post('save', async (doc, next) => {
     }
     next();
 });
-const { getRandomProfileUrl } = require('../helpers')
+const { getRandomProfileUrl } = require('../utils/helpers')
 userSchema.post('save', async doc => {
     // make empty timeline
     home_timeline.create({

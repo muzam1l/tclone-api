@@ -47,14 +47,14 @@ timelineSchema.statics.getTimeline = async function ({
             populate: 'user' //populates user feild
         })
     posts = posts.map(obj => obj.post_id);
-    let { friend_ids = [] } = await mongoose.model("Friendship").findOne({ user_id }, "friend_ids")
-    posts = posts.map(pst => {
-        let post = pst.toObject()
-        let user = post.user
-        if (friend_ids.includes(user._id))
-            post.user = { ...user, following: true }
-        return post
-    })
+    // let { friend_ids = [] } = await mongoose.model("Friendship").findOne({ user_id }, "friend_ids")
+    // posts = posts.map(pst => {
+    //     let post = pst.toObject()
+    //     let user = post.user
+    //     if (friend_ids.includes(user._id))
+    //         post.user = { ...user, following: true }
+    //     return post
+    // })
     return posts;
 }
 /**<Model>.bulkAddPosts

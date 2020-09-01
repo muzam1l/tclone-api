@@ -9,8 +9,14 @@ const Post = require('../models/post')
 const Trend = require('../models/trend')
 const User = require('../models/user')
 const passport = require('passport')
-const { ensureLoggedIn } = require('../middlewares')
-const { filterInput } = require('../helpers')
+const { ensureLoggedIn } = require('../utils/middlewares')
+const { filterInput } = require('../utils/helpers')
+const {
+  serialisePosts,
+  serialisePost,
+  serializeUser,
+  serializeUsers
+} = require('../utils/serializers')
 /* GET home page. */
 router.get('/home_timeline', ensureLoggedIn, async (req, res) => {
   try {
@@ -19,6 +25,7 @@ router.get('/home_timeline', ensureLoggedIn, async (req, res) => {
     assert.ok(user);
     let page = req.query['p'];
     let posts = /*list*/await home_timeline.getTimeline({ user_id: user._id }, page);
+    posts = await serialisePosts(posts, req.user)
     res.json({
       posts //posts: null or empty when exhausts
     })
@@ -33,10 +40,12 @@ router.post('/post', ensureLoggedIn, async (req, res) => {
   let user = req.user;
   assert.ok(user);
   try {
-    let pst = await Post.addOne({ user_id: user._id }, req.body)
+    let post = await Post.addOne({ user_id: user._id }, req.body)
+    post = await pst.populate('user').execPopulate()
+    post = await serialisePost(post, req.user)
     res.status(200).json({
       'msg': 'post was succesfully added',
-      'post': await pst.populate('user').execPopulate(),
+      post
     });
   } catch (err) {
     console.error('error in /posts/new', err)
@@ -47,16 +56,20 @@ router.post('/post', ensureLoggedIn, async (req, res) => {
 /* GET get a single post. */
 router.get('/post/:postId', async (req, res) => {
   let postId = req.params.postId;
+  let user = req.user;
   try {
     let post = await Post.findOne({ id_str: postId })
     if (!post) {
       res.status(400).json({ msg: "Bad request" })
       return
     }
+    post = await post.populate('user').execPopulate()
+    post = await serialisePost(post, req.user)
     res.status(200).json({
-      post: await post.populate('user').execPopulate()
+      post
     });
   } catch (err) {
+    console.log(err)
     res.status(500).json({ msg: 'Something went wrong' })
   }
 });
@@ -66,6 +79,7 @@ router.get('/user/:username', async (req, res) => {
   try {
     username = filterInput(username, 'username');
     let user = await User.findOne({ screen_name: username })
+    user = await serializeUser(post, req.user)
     res.status(200).json({
       user
     });
@@ -131,6 +145,8 @@ router.get('/user_timeline/:username', async (req, res) => {
       return
     }
     let posts = await Post.getUserTimeline({ user_id: user._id }, page)
+    posts = await serialisePosts(posts, req.user)
+    user = await serializeUser(user, req.user)
     res.json({
       posts,
       user
@@ -157,13 +173,16 @@ router.get('/search', async (req, res) => {
       // posts containing hashtag
       let result = await Post.searchHashtag(query, page);
       //result direct return of find (empty array when no match)
-      res.json({ posts: result });
+      posts = await serialisePosts(result, req.user)
+      res.json({ posts });
       return;
     }
     else if (query.startsWith('@')) {
       // posts containing @query or accounts matching query
       let posts = await Post.searchUserMention(query, page);
       let users = await User.searchUser(query);
+      posts = await serialisePosts(posts, req.user)
+      users = await serialisePost(users, req.user)
       res.json({
         posts,
         users
@@ -174,7 +193,8 @@ router.get('/search', async (req, res) => {
       //do a text search
       let result = await Post.searchText(query, page);
       //result is direct return of find()
-      res.json({ posts: result });
+      posts = await serialisePosts(result, req.user)
+      res.json({ posts });
     }
   } catch (err) {
     console.log('error in /search:', err)
@@ -201,11 +221,7 @@ router.get('/users', ensureLoggedIn, async (req, res) => {
   assert.ok(user)
   try {
     let users = await User.getSuggestions({ user_id: user._id });
-    // TODO find better way to do this
-    users = users.map(user => ({
-      ...user._doc,
-      following: false
-    }))
+    users = await serializeUsers(users, req.user)
     res.json({
       users,
       more: false
