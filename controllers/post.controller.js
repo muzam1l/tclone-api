@@ -44,3 +44,16 @@ exports.likePost = async (req, res, next) => {
         next(err)
     }
 }
+exports.unlikePost = async (req, res, next) => {
+    try {
+        let postId = req.params.postId;
+        let user = req.user;
+        let responce = await Friendship.unlikePost(user._id, { postId })
+        if (responce.ok)
+            res.json({ message: "Post was unliked" })
+        else
+            throw Error("Error in unlike post")
+    } catch (err) {
+        next(err)
+    }
+}
