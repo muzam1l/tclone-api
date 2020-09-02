@@ -1,7 +1,7 @@
 var express = require('express');
 var router = express.Router();
 const passport = require('passport')
-const User = require('../models/user')
+const User = require('../models/user.model')
 const { ensureLoggedIn } = require('../utils/middlewares')
 
 router.post('/login', passport.authenticate('local'), async (req, res) => {

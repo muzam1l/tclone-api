@@ -1,8 +1,8 @@
 const mongoose = require('mongoose')
 const assert = require('assert')
-const User = require('../models/user')
-const Post = require('../models/post')
-const Trend = require('../models/trend')
+const User = require('../models/user.model')
+const Post = require('../models/post.model')
+const Trend = require('../models/trend.model')
 
 const dummy_timeline = require('./home_timeline.json')
 async function pre_populate() {

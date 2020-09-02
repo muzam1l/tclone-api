@@ -1,9 +1,9 @@
 const mongoose = require('mongoose')
 require('mongoose-long')(mongoose)
-const internal_setting = require('../models/internal_setting')
-const User = require('./user')
-const Hashtag = require('./hashtag')
-const home_timeline = require('./home_timeline')
+const internal_setting = require('./internal_setting.model')
+const User = require('./user.model')
+const Hashtag = require('./hashtag.model')
+const home_timeline = require('./home_timeline.model')
 
 const postSchema = mongoose.Schema({
     "created_at": { type: Date, default: Date.now },   //"Thu Apr 30 12:11:23 +0000 2020",
