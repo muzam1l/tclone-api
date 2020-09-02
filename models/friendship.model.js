@@ -42,8 +42,10 @@ friendshipSchema.statics.isLiked = async function (user_id = null, post_id = nul
     })
 }
 friendshipSchema.statics.likePost = async function (user_id = null, { post_id, postId }) {
-    if (!post_id && postId)
-        post_id = await mongoose.model("Post").findOne({ id_str: postId })
+    if (!post_id && postId) {
+        post = await mongoose.model("Post").findOne({ id_str: postId }, "_id")
+        post_id = post._id;
+    }
     let liked = await this.isLiked(user_id, post_id)
     if (liked)
         return ({ ok: 1, nModified: 0 })
@@ -54,6 +56,25 @@ friendshipSchema.statics.likePost = async function (user_id = null, { post_id, p
         await mongoose.model("Post").findByIdAndUpdate(post_id, {
             $inc: {
                 favorite_count: 1
+            }
+        })
+    return res1
+}
+friendshipSchema.statics.unlikePost = async function (user_id = null, { post_id, postId }) {
+    if (!post_id && postId) {
+        post = await mongoose.model("Post").findOne({ id_str: postId }, "_id")
+        post_id = post._id
+    }
+    let liked = await this.isLiked(user_id, post_id)
+    if (!liked)
+        return ({ ok: 1, nModified: 0 })
+    let res1 = await this.updateOne({ user_id }, {
+        $pull: { liked_posts: post_id }
+    })
+    if (res1.ok)
+        await mongoose.model("Post").findByIdAndUpdate(post_id, {
+            $inc: {
+                favorite_count: -1
             }
         })
     return res1
