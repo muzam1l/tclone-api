@@ -23,6 +23,26 @@ This project is my own take on building Twitter clone, I have tried to keep thin
 
 - And a large part of my otherwise useless brain.
 
+## File structure (UPDATED!)
+File structure is now more standard and consice, here is a rundown of project structure 
+- `models/`
+  - `trend.model.js` - contains mongoose schema's for models and their respective methods/statics
+- `routes/`
+  - `auth.js` - contains authentication related routes, like `/auth/login`, `/auth/logout`, etc.
+  - `api.js` - contains all other routes
+- `controllers/`
+  - `user.controller.js` contains functions to be used in router, like `getUser` for `/api/user/:username` endpoint
+  - ...
+- `serializers/`
+  - `post.serializer.js` contains functions to serialize Post Object or Array and includes fields particular to authticated user.
+  - ...
+- `utils/`
+  - `helpers.js`  containes some miscellaneous helper utilities like escapeHtml, etc
+  - `mddlewares.js` middlewares like ensureLoggedIn
+- `dummy-data/` contains json and script for parsing some pre-populated data
+- `passport.js` passport related congig and functions
+- `app.js` main express app.
+
 ##  This is the overview of what's contained in this repo.
 
 ### ⚡ Routes ⚡
