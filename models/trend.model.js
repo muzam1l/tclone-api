@@ -1,5 +1,5 @@
 const mongoose = require('mongoose');
-const Hashtag = require('../models/hashtag')
+const Hashtag = require('./hashtag.model')
 
 const trendSchema = mongoose.Schema({
     trends: [{

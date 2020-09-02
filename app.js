@@ -63,4 +63,9 @@ app.use(passport.session());
 app.use('/api', apiRouter);
 app.use('/auth', authRouter);
 
+app.use(function (err, req, res, next) {
+    console.error(err.stack)
+    res.status(500).json({ message: 'Something went wrong!' })
+})
+
 module.exports = app;

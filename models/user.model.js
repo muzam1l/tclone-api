@@ -1,10 +1,10 @@
 const mongoose = require('mongoose')
 require('mongoose-long')(mongoose)
-const Friendship = require('./friendship')
-const home_timeline = require('./home_timeline')
+const Friendship = require('./friendship.model')
+const home_timeline = require('./home_timeline.model')
 
-const internal_setting = require('./internal_setting')
-const Auth = require('./auth')
+const internal_setting = require('./internal_setting.model')
+const Auth = require('./auth.model')
 
 const userSchema = mongoose.Schema({
     "id": { type: mongoose.Schema.Types.Long, unique: true },
