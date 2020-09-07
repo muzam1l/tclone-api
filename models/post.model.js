@@ -47,14 +47,20 @@ const postSchema = mongoose.Schema({
     "is_quote_status": { type: Boolean, default: false },
     "quoted_status_id": { type: mongoose.Schema.Types.Long },
     "quoted_status_id_str": { type: String },
-    "quoted_status": { type: {} }, //vl contain Tweet
-    "retweeted_status": { type: {} }, //vl contain Tweet
+    "quoted_status": {
+        type: mongoose.Schema.Types.ObjectId,
+        ref: 'Post'
+    },
+    "retweeted_status": {
+        type: mongoose.Schema.Types.ObjectId,
+        ref: 'Post'
+    },
 
     "retweet_count": { type: Number, default: 0 },
     "favorite_count": { type: Number, default: 0 },
     "reply_count": { type: Number, default: 0 },
 
-    //maybe for hometimeline only
+    //for personalised post objects (serialized)
     "favorited": { type: Boolean, default: false },
     "retweeted": { type: Boolean, default: false },
     "lang": { type: String, default: null }
@@ -95,7 +101,6 @@ postSchema.statics.searchHashtag = async function (query, page = 1) {
         .sort('-created_at')
         .skip(sPage * (page - 1))
         .limit(sPage)
-        .populate('user');
 }
 postSchema.statics.searchUserMention = async function (query, page = 1) {
     page = parseInt(page);
@@ -112,7 +117,6 @@ postSchema.statics.searchUserMention = async function (query, page = 1) {
     }).sort('-created_at')
         .skip(sPage * (page - 1))
         .limit(sPage)
-        .populate('user');
 }
 postSchema.statics.searchText = async function (query, page = 1) {
     page = parseInt(page);
@@ -122,7 +126,6 @@ postSchema.statics.searchText = async function (query, page = 1) {
     ).sort({ score: { $meta: 'textScore' } })
         .skip(sPage * (page - 1))
         .limit(sPage)
-        .populate('user')
 }
 postSchema.statics.getUserTimeline = async function ({
     username: screen_name = null,
@@ -139,7 +142,6 @@ postSchema.statics.getUserTimeline = async function ({
     }).sort("-created_at")
         .skip(sPage * (page - 1))
         .limit(sPage)
-        .populate('user')
 }
 
 async function post_genId() {

@@ -1,4 +1,5 @@
 const User = require('../models/user.model')
+const Friendship = require('../models/friendship.model')
 const { serializeUser } = require('../serializers/user.serializer')
 const { filterInput } = require('../utils/helpers')
 
@@ -16,6 +17,7 @@ exports.getUser = async (req, res, next) => {
         next(err)
     }
 }
+
 exports.followUser = async (req, res, next) => {
     try {
         let username = req.params.username;
@@ -25,9 +27,11 @@ exports.followUser = async (req, res, next) => {
             throw Error('username does not exist');
         let req_user = await User.findById(req.user._id);
         let responce = await req_user.follow(user._id);
-        if (!responce.ok) {
+        if (responce.ok)
+            await Friendship.gotFollowed(user._id, req_user._id)
+        else
             throw Error('user.follow responce not ok');
-        }
+
         res.json({
             message: 'success'
         })
@@ -44,9 +48,10 @@ exports.unFollowUser = async (req, res, next) => {
             throw Error('username does not exist');
         let req_user = await User.findById(req.user._id);
         let responce = await req_user.unfollow(user._id);
-        if (!responce.ok) {
+        if (responce.ok)
+            await Friendship.gotUnfollowed(user._id, req_user._id)
+        else
             throw Error('user.unfollow responce not ok');
-        }
         res.json({
             message: 'success'
         })

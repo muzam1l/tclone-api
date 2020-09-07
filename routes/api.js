@@ -3,7 +3,7 @@ var router = express.Router();
 
 const { ensureLoggedIn } = require('../utils/middlewares')
 
-const { createPost, getPost, likePost, unlikePost } = require('../controllers/post.controller')
+const { createPost, getPost, likePost, unlikePost, repostPost, unrepostPost } = require('../controllers/post.controller')
 const { getUser, followUser, unFollowUser } = require('../controllers/user.controller')
 const { homeTimeline, userTimeline } = require('../controllers/timeline.controller')
 const { search, trends, userSuggests } = require('../controllers/search.controller')
@@ -16,6 +16,10 @@ router.get('/user_timeline/:username', userTimeline)
 
 /* POST create new post. */
 router.post('/post', ensureLoggedIn, createPost);
+/* POST repost a post. */
+router.post('/repost', ensureLoggedIn, repostPost);
+/* POST unrepost a post. */
+// router.post('/unrepost', ensureLoggedIn, unrepostPost);
 /* GET get a single post. */
 router.get('/post/:postId', getPost);
 router.all('/like/:postId', ensureLoggedIn, likePost);

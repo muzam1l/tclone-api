@@ -105,9 +105,10 @@ userSchema.methods.follow = async function (...list_id_tobe_friends) {
             }
         }, { upsert: true });
         if (res1.ok) {
-            this.update({
+            await this.update({
                 $inc: { friends_count: 1 }
-            }) //await omitted
+            })
+
 
             for (let id of list_id_tobe_friends) {
                 await home_timeline
@@ -136,9 +137,9 @@ userSchema.methods.unfollow = async function (...list_id_tobe_not_friends) {
             }
         }, { upsert: true });
         if (res1.ok) {
-            this.update({
+            await this.update({
                 $inc: { friends_count: -1 }
-            }) //await omitted
+            })
 
             // remove posts from home_timeline
             for (let id of list_id_tobe_not_friends) {
@@ -211,10 +212,10 @@ userSchema.post('save', async (doc, next) => {
 const { getRandomProfileUrl } = require('../utils/helpers')
 userSchema.post('save', async doc => {
     // make empty timeline
-    home_timeline.create({
+    await home_timeline.create({
         user_id: doc._id,
-    }) //await omitted
-    Friendship.create({
+    })
+    await Friendship.create({
         user_id: doc._id,
         friend_ids: [doc._id]
     })

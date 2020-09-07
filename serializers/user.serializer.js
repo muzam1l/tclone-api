@@ -7,7 +7,8 @@ const Friendship = require('../models/friendship.model')
 exports.serializeUser = async (user, client = null) => {
     if (!user)
         return
-    if (user instanceof Document)
+
+    if (user.toObject)
         user = user.toObject()
     if (!client)
         return user
@@ -18,8 +19,6 @@ exports.serializeUser = async (user, client = null) => {
     })
 }
 exports.serializeUsers = async (users = [], client) => {
-    if (users.toObject)
-        users = users.toObject()
     if (!users instanceof Array)
         throw Error("Unknown type")
     return Promise.all(users.map(user => this.serializeUser(user, client)))
