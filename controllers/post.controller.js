@@ -77,17 +77,18 @@ exports.repostPost = async (req, res, next) => {
         next(err)
     }
 }
-// exports.unrepostPost = async (req, res, next) => {
-//     try {
-//         let post = req.body;
-//         let user = req.user;
-//         assert.ok(user)
-//         await Post.findOneAndDelete({ retweeted_status: post._id })
-//         await Friendship.postUnreposted(user._id, { post_id: post._id })
-//         res.json({
-//             message: "Succesfully Unreposted"
-//         })
-//     } catch (err) {
-//         next(err)
-//     }
-// }
+exports.unrepostPost = async (req, res, next) => {
+    try {
+        let post = req.body;
+        let user = req.user;
+        assert.ok(user)
+        let doc = await Post.findOne({ retweeted_status: post._id })
+        await doc.deleteOne()
+        await Friendship.postUnreposted(user._id, { post_id: post._id })
+        res.json({
+            message: "Succesfully Unreposted"
+        })
+    } catch (err) {
+        next(err)
+    }
+}

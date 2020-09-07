@@ -19,7 +19,7 @@ router.post('/post', ensureLoggedIn, createPost);
 /* POST repost a post. */
 router.post('/repost', ensureLoggedIn, repostPost);
 /* POST unrepost a post. */
-// router.post('/unrepost', ensureLoggedIn, unrepostPost);
+router.post('/unrepost', ensureLoggedIn, unrepostPost);
 /* GET get a single post. */
 router.get('/post/:postId', getPost);
 router.all('/like/:postId', ensureLoggedIn, likePost);

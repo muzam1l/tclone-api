@@ -26,9 +26,9 @@ exports.followUser = async (req, res, next) => {
         if (!user)
             throw Error('username does not exist');
         let req_user = await User.findById(req.user._id);
-        let responce = await req_user.follow(user._id);
-        if (responce.ok)
-            await Friendship.gotFollowed(user._id, req_user._id)
+        let responce = await Friendship.gotFollowed(user._id, req_user._id)
+        if (responce.ok && responce.nModified !== 0)
+            await req_user.follow(user._id);
         else
             throw Error('user.follow responce not ok');
 
@@ -47,9 +47,9 @@ exports.unFollowUser = async (req, res, next) => {
         if (!user)
             throw Error('username does not exist');
         let req_user = await User.findById(req.user._id);
-        let responce = await req_user.unfollow(user._id);
-        if (responce.ok)
-            await Friendship.gotUnfollowed(user._id, req_user._id)
+        let responce = await Friendship.gotUnfollowed(user._id, req_user._id)
+        if (responce.ok && responce.nModified !== 0)
+            await req_user.unfollow(user._id);
         else
             throw Error('user.unfollow responce not ok');
         res.json({

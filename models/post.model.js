@@ -220,5 +220,46 @@ postSchema.post('save', async (doc, next) => {
         }, { upsert: true });
     });
 });
+postSchema.pre('deleteMany', { document: true, query: true }, next => {
+    next(new Error('deletemany is not configured yet, use deleteOne instead'));
+});
+postSchema.pre('deleteOne', { document: false, query: true }, next => {
+    next(new Error('deleteOne on query is not configured yet, use deleteOne on Doc instead'));
+});
+/** QUERY middleware */
+postSchema.post('deleteOne', { document: true, query: false }, async doc => {
+    try {
+        //update statuses_count in User
+        await mongoose.model('User').findOneAndUpdate({ _id: doc.user }, {
+            $inc: { statuses_count: 1 }
+        });
+        // update  friends posts
+        let quer = await mongoose.model('Friendship').findOne({ user_id: doc.user }, 'friend_ids');
+        if (quer) {
+            await mongoose.model('home_timeline')
+                .bulkRemovePosts(quer.friend_ids, { id_post_removed: doc._id });
+        }
+        // update timeline of mentioned users
+        let { entities: { user_mentions = [], hashtags = [] } = {} } = doc;
+        user_mentions.forEach(async mention => {
+            if (!mention)
+                return
+            let user = await User.findOne({ id: mention.id }, '_id');
+            if (user) {
+                await home_timeline.bulkRemovePosts([user._id], { id_post_removed: doc._id });
+            }
+        })
+        // update trends (hashtag collection actually)
+        let names = hashtags.map(obj => obj.text);
+        names.forEach(async name => {
+            await Hashtag.updateOne({ name: '#' + name }, {
+                $inc: { tweet_volume: -1 }
+            });
+        });
+    } catch (err) {
+        console.log(err)
+        throw err
+    }
+});
 
 module.exports = mongoose.model('Post', postSchema);
