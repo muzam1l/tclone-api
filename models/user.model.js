@@ -86,6 +86,10 @@ userSchema.statics.createNew = async function (userDat, authDat) {
         throw error;
     }
 }
+userSchema.statics.countPosts = async function (user_id) {
+    return mongoose.model('Post').countDocuments({ user: user_id })
+}
+
 userSchema.methods.validPassword = async function (password) {
     return Auth.validPassword(this._id, password);
 }
@@ -105,10 +109,9 @@ userSchema.methods.follow = async function (...list_id_tobe_friends) {
             }
         }, { upsert: true });
         if (res1.ok) {
-            await this.update({
-                $inc: { friends_count: 1 }
-            })
-
+            // await this.update({
+            //     $inc: { friends_count: 1 }
+            // }) // counted in serializer now
 
             for (let id of list_id_tobe_friends) {
                 await home_timeline
@@ -137,9 +140,9 @@ userSchema.methods.unfollow = async function (...list_id_tobe_not_friends) {
             }
         }, { upsert: true });
         if (res1.ok) {
-            await this.update({
-                $inc: { friends_count: -1 }
-            })
+            // await this.update({
+            //     $inc: { friends_count: -1 }
+            // }) // counted in serializer now
 
             // remove posts from home_timeline
             for (let id of list_id_tobe_not_friends) {

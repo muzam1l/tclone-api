@@ -158,9 +158,9 @@ async function post_genId() {
 postSchema.post('save', async (doc, next) => {
 
     //update statuses_count in User
-    await mongoose.model('User').findOneAndUpdate({ _id: doc.user }, {
-        $inc: { statuses_count: 1 }
-    });
+    // await mongoose.model('User').findOneAndUpdate({ _id: doc.user }, {
+    //     $inc: { statuses_count: 1 }
+    // });
     // update  friends posts
     let quer = await mongoose.model('Friendship').findOne({ user_id: doc.user }, 'friend_ids');
     if (quer) {
@@ -230,9 +230,9 @@ postSchema.pre('deleteOne', { document: false, query: true }, next => {
 postSchema.post('deleteOne', { document: true, query: false }, async doc => {
     try {
         //update statuses_count in User
-        await mongoose.model('User').findOneAndUpdate({ _id: doc.user }, {
-            $inc: { statuses_count: 1 }
-        });
+        // await mongoose.model('User').findOneAndUpdate({ _id: doc.user }, {
+        //     $inc: { statuses_count: 1 }
+        // });
         // update  friends posts
         let quer = await mongoose.model('Friendship').findOne({ user_id: doc.user }, 'friend_ids');
         if (quer) {

@@ -23,6 +23,19 @@ const friendshipSchema = mongoose.Schema({
         ref: 'Post'
     }]
 })
+friendshipSchema.statics.countFriends = async function (user_id) {
+    let doc = await this.findOne({ user_id }, 'friend_ids')
+    if (!doc || !doc.friend_ids)
+        return 0
+    return doc.friend_ids.length
+}
+friendshipSchema.statics.countFollowers = async function (user_id) {
+    let doc = await this.findOne({ user_id }, 'follower_ids')
+    if (!doc || !doc.follower_ids)
+        return 0
+    return doc.follower_ids.length
+}
+
 /**
  * checks if user1 is following user2
  * @param {*} user1_id 
@@ -156,9 +169,9 @@ friendshipSchema.statics.gotFollowed = async function (user1_id = null, user2_id
     let follower = await this.isFollowed(user1_id, user2_id)
     if (follower) //already follower, skip(bug in front-end app)
         return ({ ok: 1, nModified: 0 })
-    await mongoose.model('User').findByIdAndUpdate(user1_id, {
-        $inc: { followers_count: 1 }
-    })
+    // await mongoose.model('User').findByIdAndUpdate(user1_id, {
+    //     $inc: { followers_count: 1 }
+    // }) // counted in serializer now
     return this.updateOne({ user_id: user1_id }, {
         $push: { follower_ids: user2_id }
     }, { upsert: true })
@@ -173,9 +186,9 @@ friendshipSchema.statics.gotUnfollowed = async function (user1_id = null, user2_
     let follower = await this.isFollowed(user1_id, user2_id)
     if (!follower) //not a follower, skip. (bug in front-end app)
         return ({ ok: 1, nModified: 0 })
-    await mongoose.model('User').findByIdAndUpdate(user1_id, {
-        $inc: { followers_count: -1 }
-    })
+    // await mongoose.model('User').findByIdAndUpdate(user1_id, {
+    //     $inc: { followers_count: -1 }
+    // }) // counted in serializer now
     return this.updateOne({ user_id: user1_id }, {
         $pull: { follower_ids: user2_id }
     })
