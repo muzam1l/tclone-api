@@ -23,11 +23,9 @@ exports.serializePost = async (post, client) => {
     let user = await serializeUser(post.user, client)
 
     post = post.toObject()
-    if (!client)
-        return post
     //serialize post if necessary
-    let favorited = await Friendship.isLiked(client._id, post._id)
-    let retweeted = await Friendship.isReposted(client._id, post._id)
+    let favorited = await Friendship.isLiked(client && client._id, post._id)
+    let retweeted = await Friendship.isReposted(client && client._id, post._id)
     return ({
         ...post,
         favorited,

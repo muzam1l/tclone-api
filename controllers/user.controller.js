@@ -38,8 +38,10 @@ exports.updateUser = async (req, res, next) => {
                 'entities.url.urls': [url]
             },
         }, { new: true })
-        if (user)
+        if (user) {
+            user = await serializeUser(user, user)
             res.json({ user })
+        }
         else
             throw Error('error in updateUser')
     } catch (err) {
