@@ -2,7 +2,6 @@ const Post = require('../models/post.model')
 const Friendship = require('../models/friendship.model')
 const { serializePost } = require('../serializers/post.serializer')
 const assert = require('assert')
-const { post } = require('../routes/api')
 
 exports.createPost = async (req, res, next) => {
     try {

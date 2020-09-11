@@ -27,13 +27,19 @@ friendshipSchema.statics.countFriends = async function (user_id) {
     let doc = await this.findOne({ user_id }, 'friend_ids')
     if (!doc || !doc.friend_ids)
         return 0
-    return doc.friend_ids.length
+    let length = doc.friend_ids.length
+    if (doc.friend_ids.includes(user_id))
+        length--
+    return length
 }
 friendshipSchema.statics.countFollowers = async function (user_id) {
     let doc = await this.findOne({ user_id }, 'follower_ids')
     if (!doc || !doc.follower_ids)
         return 0
-    return doc.follower_ids.length
+    let length = doc.follower_ids.length
+    if (doc.follower_ids.includes(user_id))
+        length--
+    return length
 }
 
 /**

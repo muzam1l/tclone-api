@@ -47,6 +47,7 @@ const userSchema = mongoose.Schema({
     "profile_image_url_https": { type: String, default: null },
     "profile_banner_url": { type: String, default: null },
 
+    "profile_banner_color": { type: String, default: null }
     //twitter deprecated ones
     /*
     "utc_offset": { type: String },

@@ -4,7 +4,7 @@ var router = express.Router();
 const { ensureLoggedIn } = require('../utils/middlewares')
 
 const { createPost, getPost, likePost, unlikePost, repostPost, unrepostPost } = require('../controllers/post.controller')
-const { getUser, followUser, unFollowUser } = require('../controllers/user.controller')
+const { getUser, followUser, unFollowUser, updateUser } = require('../controllers/user.controller')
 const { homeTimeline, userTimeline } = require('../controllers/timeline.controller')
 const { search, trends, userSuggests } = require('../controllers/search.controller')
 
@@ -30,6 +30,8 @@ router.all('/unlike/:postId', ensureLoggedIn, unlikePost);
 router.get('/user/:username', getUser);
 router.all('/follow/:username', ensureLoggedIn, followUser);
 router.all('/unfollow/:username', ensureLoggedIn, unFollowUser);
+/* POST update authenticated user */
+router.post('/updateuser', ensureLoggedIn, updateUser);
 
 /* GET seach results */
 router.get('/search', search)

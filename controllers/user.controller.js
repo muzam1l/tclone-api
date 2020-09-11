@@ -2,7 +2,7 @@ const User = require('../models/user.model')
 const Friendship = require('../models/friendship.model')
 const { serializeUser } = require('../serializers/user.serializer')
 const { filterInput } = require('../utils/helpers')
-
+const assert = require('assert')
 
 exports.getUser = async (req, res, next) => {
     try {
@@ -13,6 +13,35 @@ exports.getUser = async (req, res, next) => {
         res.status(200).json({
             user
         });
+    } catch (err) {
+        next(err)
+    }
+}
+exports.updateUser = async (req, res, next) => {
+    try {
+        let user = req.user
+        assert.ok(user)
+        let { name, description, profile_banner_color, location, website, profile_image_url_https } = req.body
+        let url = {
+            url: website,
+            expanded_url: website,
+        }
+        user = await User.findByIdAndUpdate(user._id, {
+            $set: {
+                name,
+                description,
+                profile_image_url_https,
+                profile_banner_color,
+                location,
+                default_profile_image: false,
+                default_profile: false,
+                'entities.url.urls': [url]
+            },
+        }, { new: true })
+        if (user)
+            res.json({ user })
+        else
+            throw Error('error in updateUser')
     } catch (err) {
         next(err)
     }
