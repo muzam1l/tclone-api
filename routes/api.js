@@ -7,6 +7,12 @@ const { createPost, getPost, likePost, unlikePost, repostPost, unrepostPost } = 
 const { getUser, followUser, unFollowUser, updateUser } = require('../controllers/user.controller')
 const { homeTimeline, userTimeline } = require('../controllers/timeline.controller')
 const { search, trends, userSuggests } = require('../controllers/search.controller')
+const { notificationRead, getNotifications } = require('../controllers/notifications.controller')
+
+/* GET notification read*/
+router.get('/notification_read/:_id', ensureLoggedIn, notificationRead)
+/* GET all notifications */
+router.get('/notifications', ensureLoggedIn, getNotifications)
 
 /* GET home page. */
 router.get('/home_timeline', ensureLoggedIn, homeTimeline);

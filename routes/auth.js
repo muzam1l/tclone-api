@@ -3,6 +3,7 @@ var router = express.Router();
 const passport = require('passport')
 const User = require('../models/user.model')
 const { ensureLoggedIn } = require('../utils/middlewares')
+const { destroyAuthSession: destroySocketSession } = require('../socketApi')
 
 router.post('/login', passport.authenticate('local'), async (req, res) => {
     try {
@@ -35,11 +36,13 @@ router.get('/login', ensureLoggedIn, async (req, res) => {
     }
 })
 router.get('/logout', (req, res) => {
+    let { socketId } = req.session
     req.logout();
     req.session.destroy((err) => {
         if (err) console.log('error /logout', err);
         res.redirect('/')
     })
+    destroySocketSession(socketId)
 })
 const { filterInput } = require('../utils/helpers')
 router.post('/signup', async (req, res) => {
