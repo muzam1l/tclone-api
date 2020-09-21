@@ -25,3 +25,45 @@ exports.getNotifications = async (req, res, next) => {
         next(err)
     }
 }
+exports.subscribeDevice = async (req, res, next) => {
+    try {
+        const user = req.user;
+        const subscription = req.body
+        if (!subscription.endpoint || !subscription.keys) { // Not a valid subscription.
+            res.status(400).json({ msg: 'Invalid subscription' })
+            return
+        }
+        if (!await Notification.exists({
+            user_id: user._id,
+            'subscriptions.endpoint': subscription.endpoint
+        })) {
+            console.log('saving subscription in db')
+            await Notification.updateOne({ user_id: user._id }, {
+                $push: { subscriptions: subscription }
+            }, { upsert: true })
+            const session = req.session;
+            session.endpoint = subscription.endpoint;
+            session.save()
+        } else { console.log('Subscription already exists') }
+
+        res.status(200).json({ 'success': true })
+    } catch (err) {
+        next(err)
+    }
+}
+exports.unsubscribeDevice = async (req, res, next) => {
+    try {
+        const user = req.user;
+        const endpoint = req.session.endpoint;
+        if (!endpoint) {
+            console.log('no endpoint in session')
+            return res.status(400).json({ msg: 'Not subscripbed' })
+        }
+        await Notification.updateOne({ user_id: user._id }, {
+            $pull: { subscriptions: { endpoint } }
+        })
+        res.json({ msg: 'Ok' })
+    } catch (err) {
+        next(err)
+    }
+}

@@ -180,7 +180,7 @@ friendshipSchema.statics.gotFollowed = async function (user1_id = null, user2_id
     // }) // counted in serializer now
     await mongoose.model('Notification').push(user1_id, {
         type: 'followed',
-        title: `Someone just followed you`,
+        title: `You were followed`,
         body: {
             user: user2_id
         }
@@ -204,7 +204,7 @@ friendshipSchema.statics.gotUnfollowed = async function (user1_id = null, user2_
     // }) // counted in serializer now
     await mongoose.model('Notification').push(user1_id, {
         type: 'unfollowed',
-        title: `Someone unfollowed you`,
+        title: `You were unfollowed`,
         body: {
             user: user2_id
         }

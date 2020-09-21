@@ -27,7 +27,7 @@ async function core_ensureLoggedIn(req, _, next) {
     next();
 }
 const sessionMiddleware = session({
-    secret: 'my shitty session secret',
+    secret: process.env.SESSION_SECRET || 'my shitty session secret',
     name: 'tclone',
     resave: false,
     saveUninitialized: true,

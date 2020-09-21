@@ -214,7 +214,7 @@ postSchema.post('save', async (doc, next) => {
 
             await Notification.push(user._id, {
                 type: 'mentioned',
-                title: `You were just mentioned by ${doc.user.screen_name}`,
+                title: `You were mentioned by ${doc.user.screen_name}`,
                 body: {
                     user: doc.user._id,
                     post: doc._id
