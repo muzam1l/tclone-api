@@ -5,9 +5,10 @@ var cookieParser = require('cookie-parser');
 var morgan = require('morgan');
 var compression = require('compression')
 var mongoose = require('mongoose');
-var session = require('express-session');
-const MongoStore = require('connect-mongo')(session);
+const dotenv = require('dotenv')
+const webpush = require('web-push')
 
+const { sessionMiddleware } = require('./utils/middlewares')
 const apiRouter = require('./routes/api');
 const authRouter = require('./routes/auth')
 
@@ -28,22 +29,11 @@ mongoose
     })
 
 var app = express();
+dotenv.config()
 const passport = require('./passport')
 //app.set('trust proxy', 1) // trust first proxy, when node is behind proxy server
-app.use(session({
-    secret: 'my shitty session secret',
-    name: 'tclone',
-    resave: false,
-    saveUninitialized: true,
-    store: new MongoStore({
-        mongooseConnection: mongoose.connection,
-        //secret: 'this will encrypt my sessions'
-    }),
-    cookie: {
-        //secure: true,
-        maxAge: 30 * 24 * 60 * 60 * 1000 //30 days
-    }
-}))
+
+app.use(sessionMiddleware)
 
 // create a write stream (in append mode)
 const accessLogStream = fs.createWriteStream(path.join(__dirname, 'access.log'), { flags: 'a' })
@@ -60,6 +50,8 @@ app.use(express.static(path.join(__dirname, 'public')));
 app.use(passport.initialize());
 app.use(passport.session());
 
+webpush.setVapidDetails(process.env.WEB_PUSH_CONTACT, process.env.PUBLIC_VAPID_KEY, process.env.PRIVATE_VAPID_KEY)
+
 app.use('/api', apiRouter);
 app.use('/auth', authRouter);
 
@@ -68,4 +60,4 @@ app.use(function (err, req, res, next) {
     res.status(500).json({ message: 'Something went wrong!' })
 })
 
-module.exports = app;
+exports.app = app;

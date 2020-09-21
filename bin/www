@@ -4,7 +4,7 @@
  * Module dependencies.
  */
 
-var app = require('../app');
+var { app } = require('../app');
 var debug = require('debug')('server:server');
 var http = require('http');
 var { io } = require('../socketApi');
@@ -33,7 +33,7 @@ server.on('listening', onListening);
 /*
  * Socket.io
 */
-io.listen(server)
+io.attach(server)
 
 /**
  * Normalize a port into a number, string, or false.
