@@ -93,7 +93,13 @@ friendshipSchema.statics.postLiked = async function (user_id = null, { post_id, 
     if (liked)
         return ({ ok: 1, nModified: 0 })
     let res1 = await this.updateOne({ user_id }, {
-        $push: { liked_posts: post_id }
+        // $push: { liked_posts:  post_id }
+        $push: {
+            liked_posts: {
+                $each: [post_id],
+                $position: 0
+            }
+        }
     }, { upsert: true })
     if (res1.ok)
         await mongoose.model("Post").findByIdAndUpdate(post_id, {
@@ -135,7 +141,13 @@ friendshipSchema.statics.postReposted = async function (user_id = null, { post_i
     if (reposted)
         return ({ ok: 1, nModified: 0 })
     let res1 = await this.updateOne({ user_id }, {
-        $push: { reposted_ids: post_id }
+        // $push: { reposted_ids: post_id }
+        $push: {
+            reposted_ids: {
+                $each: [post_id],
+                $position: 0
+            }
+        }
     })
     if (res1.ok)
         await mongoose.model("Post").findByIdAndUpdate(post_id, {
@@ -186,7 +198,13 @@ friendshipSchema.statics.gotFollowed = async function (user1_id = null, user2_id
         }
     })
     return this.updateOne({ user_id: user1_id }, {
-        $push: { follower_ids: user2_id }
+        // $push: { follower_ids: user2_id }
+        $push: {
+            follower_ids: {
+                $each: [user2_id],
+                $position: 0
+            }
+        }
     }, { upsert: true })
 }
 /**
