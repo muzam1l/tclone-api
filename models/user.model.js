@@ -105,7 +105,8 @@ userSchema.methods.follow = async function (...list_id_tobe_friends) {
         let res1 = await Friendship.updateOne({ user_id: this._id }, {
             $push: {
                 friend_ids: {
-                    $each: list_id_tobe_friends
+                    $each: list_id_tobe_friends,
+                    $position: 0
                 }
             }
         }, { upsert: true });

@@ -1,6 +1,6 @@
 const User = require('../models/user.model')
 const Friendship = require('../models/friendship.model')
-const { serializeUser } = require('../serializers/user.serializer')
+const { serializeUser, serializeUsers } = require('../serializers/user.serializer')
 const { filterInput } = require('../utils/helpers')
 const assert = require('assert')
 
@@ -86,6 +86,59 @@ exports.unFollowUser = async (req, res, next) => {
         res.json({
             message: 'success'
         })
+    } catch (err) {
+        next(err)
+    }
+}
+exports.getFollowers = async (req, res, next) => {
+    try {
+        let username = req.params.username;
+        username = filterInput(username, 'username');
+        const p = parseInt(req.query['p']); //page/batch number
+        const s = 20; //size of page/batch
+
+        const user = await User.findOne({ screen_name: username }, '_id')
+        if (!user)
+            return res.status(400).json({ msg: 'Bad request' })
+
+        const doc = await Friendship
+            .findOne({ user_id: user._id }, {
+                follower_ids: {
+                    $slice: [s * (p - 1), s]
+                }
+            })
+            .populate('follower_ids')
+        if (!doc)
+            return res.json({ users: null })
+        const users = await serializeUsers(doc.follower_ids, user)
+        res.json({ users: users })
+    } catch (err) {
+        next(err)
+    }
+}
+exports.getFriends = async (req, res, next) => {
+    try {
+        let username = req.params.username;
+        username = filterInput(username, 'username');
+        let p = req.query['p'];
+        p = parseInt(p); //page/batch number
+        const s = 15; //size of page/batch
+
+        const user = await User.findOne({ screen_name: username }, '_id')
+        if (!user)
+            return res.status(400).json({ msg: 'Bad request' })
+
+        const doc = await Friendship
+            .findOne({ user_id: user._id }, {
+                friend_ids: {
+                    $slice: [s * (p - 1), s]
+                }
+            })
+            .populate('friend_ids')
+        if (!doc)
+            return res.json({ users: null })
+        const users = await serializeUsers(doc.friend_ids, user)
+        res.json({ users: users })
     } catch (err) {
         next(err)
     }

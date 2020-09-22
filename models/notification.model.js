@@ -53,12 +53,18 @@ notifySchema.methods.push = async function (...notifs) {
     })
     notifs = this.notifications.slice(-notifs.length)
     // now we have notifs with _id
-    notifs.forEach(notif => sendPushNotif(notif, this.subscriptions))
+    notifs.forEach(notif => sendPushNotif(notif, this.subscriptions, this.user_id))
     return this.save()
 }
 notifySchema.post('save', sendSocketNotifs)
 
-async function sendPushNotif(notif, subscriptions) {
+/**
+ * 
+ * @param {mongoose.Document} notif Notifiaction object containing details
+ * @param {Array} subscriptions subscriptions of a user to send to
+ * @param {mongoose.ObjectId} user_id of user to send notification to
+ */
+async function sendPushNotif(notif, subscriptions, user_id) {
     if (!subscriptions.length)
         return
     // Send via push
@@ -69,15 +75,19 @@ async function sendPushNotif(notif, subscriptions) {
         body = post.text
         title = `@${post.user.screen_name} mentioned you in post`
     }
-    else if (notif.type === 'followed' || notif.type === 'unfollowed') {
+    else if (notif.type === 'followed') {
+        const user = await mongoose.model('User').findById(notif.body.user)
+        const client = await mongoose.model('User').findById(user_id)
+        // page = `/user/${user.screen_name}`
+        page = `/user/${client.screen_name}/followers`
+        title = `@${user.screen_name} started following you 🥳`
+        body = 'Wanna follow them back 🥺'
+    }
+    else if (notif.type === 'unfollowed') {
         let user = await mongoose.model('User').findById(notif.body.user)
         page = `/user/${user.screen_name}`
-        title = notif.type === 'followed' ?
-            `@${user.screen_name} started following you!` :
-            `@${user.screen_name} no longer follows you`
-        body = notif.type === 'followed' ?
-            'Wanna follow them back?' :
-            'Wanna unfollow them too?'
+        title = `@${user.screen_name} no longer follows you 😬`
+        body = 'Wanna unfollow them too 😈'
     }
     // maybe more types in future
 

@@ -4,7 +4,7 @@ var router = express.Router();
 const { ensureLoggedIn } = require('../utils/middlewares')
 
 const { createPost, getPost, likePost, unlikePost, repostPost, unrepostPost } = require('../controllers/post.controller')
-const { getUser, followUser, unFollowUser, updateUser } = require('../controllers/user.controller')
+const { getUser, followUser, unFollowUser, updateUser, getFollowers, getFriends } = require('../controllers/user.controller')
 const { homeTimeline, userTimeline } = require('../controllers/timeline.controller')
 const { search, trends, userSuggests } = require('../controllers/search.controller')
 const { notificationRead, getNotifications, subscribeDevice, unsubscribeDevice } = require('../controllers/notifications.controller')
@@ -21,6 +21,9 @@ router.get('/notifications/unsubscribe', ensureLoggedIn, unsubscribeDevice);
 router.get('/home_timeline', ensureLoggedIn, homeTimeline);
 /* GET user timeline */
 router.get('/user_timeline/:username', userTimeline)
+/* GET user friends and followers */
+router.get('/followers/:username', getFollowers)
+router.get('/friends/:username', getFriends)
 
 
 /* POST create new post. */
