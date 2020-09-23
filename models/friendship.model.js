@@ -1,4 +1,5 @@
 const mongoose = require('mongoose')
+const PostEngagement = require('./post_engagement.model')
 
 const friendshipSchema = mongoose.Schema({
     user_id: {
@@ -101,12 +102,8 @@ friendshipSchema.statics.postLiked = async function (user_id = null, { post_id, 
             }
         }
     }, { upsert: true })
-    if (res1.ok)
-        await mongoose.model("Post").findByIdAndUpdate(post_id, {
-            $inc: {
-                favorite_count: 1
-            }
-        })
+
+    await PostEngagement.gotLiked(post_id, user_id)
     return res1
 }
 friendshipSchema.statics.postUnliked = async function (user_id = null, { post_id, postId }) {
@@ -122,12 +119,8 @@ friendshipSchema.statics.postUnliked = async function (user_id = null, { post_id
     let res1 = await this.updateOne({ user_id }, {
         $pull: { liked_posts: post_id }
     })
-    if (res1.ok)
-        await mongoose.model("Post").findByIdAndUpdate(post_id, {
-            $inc: {
-                favorite_count: -1
-            }
-        })
+
+    await PostEngagement.gotUnliked(post_id, user_id)
     return res1
 }
 friendshipSchema.statics.postReposted = async function (user_id = null, { post_id, postId }) {
@@ -149,12 +142,8 @@ friendshipSchema.statics.postReposted = async function (user_id = null, { post_i
             }
         }
     })
-    if (res1.ok)
-        await mongoose.model("Post").findByIdAndUpdate(post_id, {
-            $inc: {
-                retweet_count: 1
-            }
-        })
+
+    await PostEngagement.gotReposted(post_id, user_id)
     return res1
 }
 friendshipSchema.statics.postUnreposted = async function (user_id = null, { post_id, postId }) {
@@ -170,12 +159,8 @@ friendshipSchema.statics.postUnreposted = async function (user_id = null, { post
     let res1 = await this.updateOne({ user_id }, {
         $pull: { reposted_ids: post_id }
     })
-    if (res1.ok)
-        await mongoose.model("Post").findByIdAndUpdate(post_id, {
-            $inc: {
-                retweet_count: -1
-            }
-        })
+
+    await PostEngagement.gotUnreposted(post_id, user_id)
     return res1
 }
 /**

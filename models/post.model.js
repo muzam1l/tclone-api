@@ -159,9 +159,9 @@ async function post_genId() {
 postSchema.post('save', async (doc, next) => {
 
     //update statuses_count in User
-    // await mongoose.model('User').findOneAndUpdate({ _id: doc.user }, {
-    //     $inc: { statuses_count: 1 }
-    // });
+    await mongoose.model('User').findOneAndUpdate({ _id: doc.user }, {
+        $inc: { statuses_count: 1 }
+    });
     // update  friends posts
     let quer = await mongoose.model('Friendship').findOne({ user_id: doc.user }, 'friend_ids');
     if (quer) {
@@ -182,6 +182,11 @@ postSchema.post('save', async (doc, next) => {
                 });
             }
             // parse username
+            /*
+            * Ignore retweets having syntax, RT @username: 
+            */
+            if (text.startsWith('RT @'))
+                text = text.slice(5)
             let mentions = text.matchAll(/@\w+/g);
             for (let match of mentions) {
                 let screen_name = match[0].slice(1);

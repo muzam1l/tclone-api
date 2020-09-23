@@ -1,6 +1,8 @@
 const Post = require('../models/post.model')
+const PostEngagement = require('../models/post_engagement.model')
 const Friendship = require('../models/friendship.model')
-const { serializePost } = require('../serializers/post.serializer')
+const { serializePost, serializePosts } = require('../serializers/post.serializer')
+const { serializeUsers } = require('../serializers/user.serializer')
 const assert = require('assert')
 
 exports.createPost = async (req, res, next) => {
@@ -87,6 +89,56 @@ exports.unrepostPost = async (req, res, next) => {
         res.json({
             message: "Succesfully Unreposted"
         })
+    } catch (err) {
+        next(err)
+    }
+}
+exports.getLikes = async (req, res, next) => {
+    try {
+        let { postId } = req.params;
+        let p = req.query['p'];
+        p = parseInt(p); //page/batch number
+        const s = 15; //size of page/batch
+
+        const post = await Post.findOne({ id_str: postId }, '_id');
+        if (!post)
+            return res.status(400).json({ msg: 'Bad request' })
+
+        let doc = await PostEngagement
+            .findOne({ post_id: post._id }, {
+                liked_by: {
+                    $slice: [s * (p - 1), s]
+                }
+            }).populate('liked_by')
+        if (!doc)
+            return res.json({ users: null })
+        let users = await serializeUsers(doc.liked_by, req.user)
+        res.json({ users })
+    } catch (err) {
+        next(err)
+    }
+}
+exports.getReposts = async (req, res, next) => {
+    try {
+        let { postId } = req.params;
+        let p = req.query['p'];
+        p = parseInt(p); //page/batch number
+        const s = 15; //size of page/batch
+
+        const post = await Post.findOne({ id_str: postId }, '_id');
+        if (!post)
+            return res.status(400).json({ msg: 'Bad request' })
+
+        let doc = await PostEngagement
+            .findOne({ post_id: post._id }, {
+                reposted_by: {
+                    $slice: [s * (p - 1), s]
+                }
+            }).populate('reposted_by')
+        if (!doc)
+            return res.json({ users: null })
+        let users = await serializeUsers(doc.reposted_by, req.user)
+        res.json({ users })
     } catch (err) {
         next(err)
     }

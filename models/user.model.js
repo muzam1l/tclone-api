@@ -111,9 +111,9 @@ userSchema.methods.follow = async function (...list_id_tobe_friends) {
             }
         }, { upsert: true });
         if (res1.ok) {
-            // await this.update({
-            //     $inc: { friends_count: 1 }
-            // }) // counted in serializer now
+            await this.update({
+                $inc: { friends_count: 1 }
+            })
 
             for (let id of list_id_tobe_friends) {
                 await home_timeline
@@ -142,9 +142,9 @@ userSchema.methods.unfollow = async function (...list_id_tobe_not_friends) {
             }
         }, { upsert: true });
         if (res1.ok) {
-            // await this.update({
-            //     $inc: { friends_count: -1 }
-            // }) // counted in serializer now
+            await this.update({
+                $inc: { friends_count: -1 }
+            })
 
             // remove posts from home_timeline
             for (let id of list_id_tobe_not_friends) {
@@ -184,7 +184,9 @@ userSchema.statics.getSuggestions = async function ({
     return this.find({
         _id: { $ne: user_id },
         _id: { $nin: friend_ids }
-    }).sort('-statuses_count -created_at').limit(25);
+    })
+        .sort('-followers_count -statuses_count friends_count -created_at') // my social media algorithm (¬‿¬)
+        .limit(25);
 }
 
 async function user_genId() {
