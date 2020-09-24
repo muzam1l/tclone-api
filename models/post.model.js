@@ -65,7 +65,7 @@ const postSchema = mongoose.Schema({
     "favorited": { type: Boolean, default: false },
     "retweeted": { type: Boolean, default: false },
     "lang": { type: String, default: null }
-})
+}, { id: false })
 let sPage = 15
 /**
 * addes a post for specific user
@@ -173,6 +173,12 @@ postSchema.post('save', async (doc, next) => {
         // parse post
         if (doc.entities.hashtags.length === 0 && doc.entities.user_mentions.length === 0) {
             let text = doc.text;
+            /* Fix
+            * Ignore retweets having syntax, RT @username: 
+            */
+            if (text.startsWith('RT @'))
+                text = ''
+
             // Parse #hastag
             let hashes = text.matchAll(/#\w+/g);
             for (let match of hashes) {
@@ -182,11 +188,6 @@ postSchema.post('save', async (doc, next) => {
                 });
             }
             // parse username
-            /*
-            * Ignore retweets having syntax, RT @username: 
-            */
-            if (text.startsWith('RT @'))
-                text = text.slice(5)
             let mentions = text.matchAll(/@\w+/g);
             for (let match of mentions) {
                 let screen_name = match[0].slice(1);
@@ -219,7 +220,7 @@ postSchema.post('save', async (doc, next) => {
 
             await Notification.push(user._id, {
                 type: 'mentioned',
-                title: `You were mentioned by ${doc.user.screen_name}`,
+                title: `You were mentioned by @${doc.user.screen_name}`,
                 body: {
                     user: doc.user._id,
                     post: doc._id

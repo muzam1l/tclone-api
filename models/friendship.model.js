@@ -172,9 +172,9 @@ friendshipSchema.statics.gotFollowed = async function (user1_id = null, user2_id
     let follower = await this.isFollowed(user1_id, user2_id)
     if (follower) //already follower, skip(bug in front-end app)
         return ({ ok: 1, nModified: 0 })
-    // await mongoose.model('User').findByIdAndUpdate(user1_id, {
-    //     $inc: { followers_count: 1 }
-    // }) // counted in serializer now
+    await mongoose.model('User').findByIdAndUpdate(user1_id, {
+        $inc: { followers_count: 1 }
+    }) // retrieved from serializer now
     await mongoose.model('Notification').push(user1_id, {
         type: 'followed',
         title: `You were followed`,
@@ -202,9 +202,9 @@ friendshipSchema.statics.gotUnfollowed = async function (user1_id = null, user2_
     let follower = await this.isFollowed(user1_id, user2_id)
     if (!follower) //not a follower, skip. (bug in front-end app)
         return ({ ok: 1, nModified: 0 })
-    // await mongoose.model('User').findByIdAndUpdate(user1_id, {
-    //     $inc: { followers_count: -1 }
-    // }) // counted in serializer now
+    await mongoose.model('User').findByIdAndUpdate(user1_id, {
+        $inc: { followers_count: -1 }
+    }) // retrieved from serializer now
     await mongoose.model('Notification').push(user1_id, {
         type: 'unfollowed',
         title: `You were unfollowed`,
