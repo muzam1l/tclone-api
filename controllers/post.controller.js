@@ -143,3 +143,64 @@ exports.getReposts = async (req, res, next) => {
         next(err)
     }
 }
+exports.getReplies = async (req, res, next) => {
+    try {
+        const postId = req.params.postId;
+        let p = req.query['p'];
+        p = parseInt(p); //page/batch number
+        const s = 15; //size of page/batch
+
+        const post = await Post.findOne({ id_str: postId })
+        if (!post)
+            return res.status(400).json({ msg: 'Bad request' })
+
+        const doc = await PostEngagement
+            .findOne({ post_id: post._id }, {
+                reply_posts: {
+                    $slice: [s * (p - 1), s]
+                }
+            }).populate('reply_posts');
+        if (!doc)
+            return res.json({ posts: null })
+        const posts = await serializePosts(doc.reply_posts, req.user)
+        res.json({ posts })
+    } catch (err) {
+        next(err)
+    }
+}
+
+exports.replyToPost = async (req, res, next) => {
+    try {
+        const postId = req.params.postId;
+        const user = req.user;
+        let post = req.body;
+        assert.ok(post)
+
+        const targetPost = await Post
+            .findOne({ id_str: postId })
+            .populate('user')
+        if (!targetPost)
+            return res.status(400).json({ msg: 'Bad request' })
+
+        let form = {
+            ...post,
+            "in_reply_to_status_id": targetPost.id,
+            "in_reply_to_status_id_str": targetPost.id_str, //would be string anyway
+            "in_reply_to_user_id": targetPost.user.id,
+            "in_reply_to_user_id_str": targetPost.user.id_str,
+            "in_reply_to_screen_name": targetPost.user.screen_name,
+            "quoted_status": targetPost._id, //just for UI to look good
+            "is_quote_status": false //maybe use this to distinguish
+        }
+        post = await Post.addOne({ user_id: user._id }, form)
+        if (post) { //no error proceed
+            await PostEngagement.gotReplied(targetPost._id, post._id)
+            post = await serializePost(post, req.user)
+            res.json({ msg: "Ok", post })
+        }
+        else
+            throw new Error('Post.addOne responce not ok')
+    } catch (err) {
+        next(err)
+    }
+}

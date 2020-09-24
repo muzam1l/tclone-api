@@ -73,7 +73,7 @@ const userSchema = mongoose.Schema({
     "is_translation_enabled": { type: Boolean },
     "translator_type": { type: String },
     */
-})
+}, { id: false })
 /**
  * @param {Object} with two userDat, authDat constaing password and/or sensitive data
  */

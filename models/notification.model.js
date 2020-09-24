@@ -4,7 +4,7 @@ const { serializeNotifs } = require('../serializers/notification.serializer')
 const webpush = require('web-push')
 
 const subdocSchema = new mongoose.Schema({
-    type: String, // 'mentioned' || '(un)followed' <| || 'liked' || 'reposted' || 'quoted' || 'recomendation' || 'update'
+    type: String, // 'replied' || 'mentioned' || '(un)followed' || 'liked' || 'reposted' <| ||  'quoted' || 'recomendation' || 'update'
     title: String,
     body: {
         type: Object,
@@ -73,7 +73,7 @@ async function sendPushNotif(notif, subscriptions, user_id) {
         let post = await mongoose.model('Post').findById(notif.body.post).populate('user')
         page = `/post/${post.id_str}`
         body = post.text
-        title = `@${post.user.screen_name} mentioned you in post`
+        title = `@${post.user.screen_name} mentioned you in a post`
     }
     else if (notif.type === 'followed') {
         const user = await mongoose.model('User').findById(notif.body.user)
@@ -88,6 +88,26 @@ async function sendPushNotif(notif, subscriptions, user_id) {
         page = `/user/${user.screen_name}`
         title = `@${user.screen_name} no longer follows you 😬`
         body = 'Wanna unfollow them too 😈'
+    }
+    else if (notif.type === 'liked') {
+        let user = await mongoose.model('User').findById(notif.body.user)
+        let post = await mongoose.model('Post').findById(notif.body.post)
+        title = `@${user.screen_name} liked your post`
+        page = `/post/${post.id_str}/likes`
+        body = post.text
+    }
+    else if (notif.type === 'reposted') {
+        let user = await mongoose.model('User').findById(notif.body.user)
+        let post = await mongoose.model('Post').findById(notif.body.post)
+        title = `@${user.screen_name} reposted your post`
+        page = `/post/${post.id_str}/reposts`
+        body = post.text
+    }
+    else if (notif.type === 'replied') {
+        let reply_post = await mongoose.model('Post').findById(notif.body.post).populate('user')
+        title = `@${reply_post.user.screen_name} replied`
+        page = `/post/${reply_post.id_str}`
+        body = reply_post.text
     }
     // maybe more types in future
 

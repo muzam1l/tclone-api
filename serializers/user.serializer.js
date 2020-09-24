@@ -1,6 +1,4 @@
-const { Document } = require('mongoose')
-const Friendship = require('../models/friendship.model')
-const User = require('../models/user.model')
+const mongoose = require('mongoose')
 
 /**
  * serializes user with fields required by client user
@@ -11,10 +9,10 @@ exports.serializeUser = async (user, client = null) => {
 
     if (user.toObject)
         user = user.toObject()
-    let followers_count = await Friendship.countFollowers(user._id)
-    let friends_count = await Friendship.countFriends(user._id)
-    let statuses_count = await User.countPosts(user._id)
-    let following = await Friendship.isFollowing(client && client._id, user._id)
+    let followers_count = await mongoose.model('Friendship').countFollowers(user._id)
+    let friends_count = await mongoose.model('Friendship').countFriends(user._id)
+    let statuses_count = await mongoose.model('User').countPosts(user._id)
+    let following = await mongoose.model('Friendship').isFollowing(client && client._id, user._id)
     return ({
         ...user,
         following,

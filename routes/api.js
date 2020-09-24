@@ -10,7 +10,9 @@ const { createPost,
     repostPost,
     unrepostPost,
     getLikes,
-    getReposts
+    getReposts,
+    replyToPost,
+    getReplies
 } = require('../controllers/post.controller')
 const { getUser, followUser, unFollowUser, updateUser, getFollowers, getFriends } = require('../controllers/user.controller')
 const { homeTimeline, userTimeline } = require('../controllers/timeline.controller')
@@ -33,9 +35,19 @@ router.get('/user_timeline/:username', userTimeline)
 router.get('/followers/:username', getFollowers)
 router.get('/friends/:username', getFriends)
 
+/* POST post a reply */
+router.post('/post/:postId/reply', ensureLoggedIn, replyToPost)
+
+/* GET Post liked_by and reposted_by */
+router.get('/post/:postId/likes', getLikes);
+router.get('/post/:postId/reposts', getReposts);
+
+/* GET Post replies */
+router.get('/post/:postId/replies', getReplies);
 
 /* POST create new post. */
 router.post('/post', ensureLoggedIn, createPost);
+
 /* POST repost a post. */
 router.post('/repost', ensureLoggedIn, repostPost);
 /* POST unrepost a post. */
@@ -44,10 +56,6 @@ router.post('/unrepost', ensureLoggedIn, unrepostPost);
 router.get('/post/:postId', getPost);
 router.all('/like/:postId', ensureLoggedIn, likePost);
 router.all('/unlike/:postId', ensureLoggedIn, unlikePost);
-
-/* GET Post liked_by and reposted_by */
-router.get('/post/:postId/likes', getLikes);
-router.get('/post/:postId/reposts', getReposts);
 
 
 /* GET get a single user detail. */

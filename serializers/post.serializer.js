@@ -1,11 +1,10 @@
-const { Document } = require('mongoose')
-const Friendship = require('../models/friendship.model')
+const mongoose = require('mongoose')
 const { serializeUser } = require('./user.serializer')
 
 exports.serializePost = async (post, client) => {
     if (!post)
         return
-    if (!post instanceof Document)
+    if (!post instanceof mongoose.Document)
         throw Error('Unknown post type')
     post = await post
         .populate('user')
@@ -24,8 +23,8 @@ exports.serializePost = async (post, client) => {
 
     post = post.toObject()
     //serialize post if necessary
-    let favorited = await Friendship.isLiked(client && client._id, post._id)
-    let retweeted = await Friendship.isReposted(client && client._id, post._id)
+    let favorited = await mongoose.model('Friendship').isLiked(client && client._id, post._id)
+    let retweeted = await mongoose.model('Friendship').isReposted(client && client._id, post._id)
     return ({
         ...post,
         favorited,
