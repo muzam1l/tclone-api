@@ -38,7 +38,7 @@ trendSchema.statics.refreshTrends = async function () {
         }, 30 * 1000);
     }
     console.log('refreshing trends')
-    let trends = await Hashtag.find({}).sort('-_id -tweet_volume').limit(20);
+    let trends = await Hashtag.find({}).sort('-updated_at -tweet_volume').limit(20);
     trends = trends.map(obj => ({
         name: obj.name,
         tweet_volume: obj.tweet_volume,
