@@ -6,5 +6,8 @@ const hashtagSchema = mongoose.Schema({
         type: Number,
         default: 0
     }
+}, {
+    timestamps:
+        { createdAt: 'created_at', updatedAt: 'updated_at' }
 })
 module.exports = mongoose.model('Hashtag', hashtagSchema)
