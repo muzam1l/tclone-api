@@ -162,11 +162,11 @@ postSchema.post('save', async (doc, next) => {
     await mongoose.model('User').findOneAndUpdate({ _id: doc.user }, {
         $inc: { statuses_count: 1 }
     });
-    // update  friends posts
-    let quer = await mongoose.model('Friendship').findOne({ user_id: doc.user }, 'friend_ids');
+    // update timeline of followers, and itself
+    let quer = await mongoose.model('Friendship').findOne({ user_id: doc.user }, 'follower_ids');
     if (quer) {
         await mongoose.model('home_timeline')
-            .bulkAddPosts(quer.friend_ids, { id_post_added: doc._id });
+            .bulkAddPosts(quer.follower_ids.concat(doc.user), { id_post_added: doc._id });
     }
     let entities = { hashtags: [], user_mentions: [] };
     try {
@@ -249,11 +249,11 @@ postSchema.post('deleteOne', { document: true, query: false }, async doc => {
         // await mongoose.model('User').findOneAndUpdate({ _id: doc.user }, {
         //     $inc: { statuses_count: 1 }
         // });
-        // update  friends posts
-        let quer = await mongoose.model('Friendship').findOne({ user_id: doc.user }, 'friend_ids');
+        // update  follower's and itself's timeline,
+        let quer = await mongoose.model('Friendship').findOne({ user_id: doc.user }, 'follower_ids');
         if (quer) {
             await mongoose.model('home_timeline')
-                .bulkRemovePosts(quer.friend_ids, { id_post_removed: doc._id });
+                .bulkRemovePosts(quer.follower_ids.concat(doc.user), { id_post_removed: doc._id });
         }
         // update timeline of mentioned users
         let { entities: { user_mentions = [], hashtags = [] } = {} } = doc;

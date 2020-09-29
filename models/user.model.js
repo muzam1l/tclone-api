@@ -185,7 +185,7 @@ userSchema.statics.getSuggestions = async function ({
         _id: { $ne: user_id },
         _id: { $nin: friend_ids }
     })
-        .sort('-followers_count -statuses_count friends_count -created_at') // my social media algorithm (¬‿¬)
+        .sort('-followers_count -statuses_count -friends_count -created_at') // my social media algorithm (¬‿¬)
         .limit(25);
 }
 
@@ -224,7 +224,6 @@ userSchema.post('save', async doc => {
     })
     await Friendship.create({
         user_id: doc._id,
-        friend_ids: [doc._id]
     })
     if (!doc.profile_image_url_https) {
         await mongoose.model('User').updateOne({ _id: doc._id }, {
