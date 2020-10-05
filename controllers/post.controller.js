@@ -4,12 +4,18 @@ const Friendship = require('../models/friendship.model')
 const { serializePost, serializePosts } = require('../serializers/post.serializer')
 const { serializeUsers } = require('../serializers/user.serializer')
 const assert = require('assert')
+const { filterInput } = require('../utils/helpers')
 
 exports.createPost = async (req, res, next) => {
     try {
         let user = req.user;
         let body = req.body;
-        assert.ok(body)
+        let { text, ...rest } = body
+        text = filterInput(text, 'html', { max_length: 500, identifier: 'Post' })
+        body = {
+            text,
+            ...rest
+        }
         let post = await Post.addOne({ user_id: user._id }, body)
         post = await serializePost(post, req.user)
         res.status(200).json({
@@ -63,7 +69,12 @@ exports.unlikePost = async (req, res, next) => {
 exports.repostPost = async (req, res, next) => {
     try {
         let post = req.body;
-        assert.ok(post)
+        let { text, ...rest } = post
+        text = filterInput(text, 'html', { max_length: 500, identifier: 'Post' })
+        post = {
+            text,
+            ...rest
+        }
         let form = {
             text: `RT @${post.user.screen_name}: ${post.text.slice(0, 50)}`,
             retweeted_status: post._id
@@ -174,7 +185,12 @@ exports.replyToPost = async (req, res, next) => {
         const postId = req.params.postId;
         const user = req.user;
         let post = req.body;
-        assert.ok(post)
+        let { text, ...rest } = post
+        text = filterInput(text, 'html', { max_length: 500, identifier: 'Post' })
+        post = {
+            text,
+            ...rest
+        }
 
         const targetPost = await Post
             .findOne({ id_str: postId })

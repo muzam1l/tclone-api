@@ -22,6 +22,11 @@ exports.updateUser = async (req, res, next) => {
         let user = req.user
         assert.ok(user)
         let { name, description, profile_banner_color, location, website, profile_image_url_https } = req.body
+        name = filterInput(name, 'name', { identifier: 'Name' });
+        description = filterInput(description, 'html', { max_length: 200, identifier: 'Bio' })
+        profile_banner_color = filterInput(profile_banner_color, null, { regex: /^#[0-9A-Fa-f]{3,6}$/, identifier: 'Banner color' })
+        location = filterInput(location, 'name', { min_length: 0, identifier: 'Location' })
+        website = filterInput(website, 'html', { min_length: 0, identifier: 'Website URL' })
         let url = {
             url: website,
             expanded_url: website,

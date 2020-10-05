@@ -180,7 +180,7 @@ postSchema.post('save', async (doc, next) => {
                 text = ''
 
             // Parse #hastag
-            let hashes = text.matchAll(/#\w+/g);
+            let hashes = text.matchAll(/#(\w|_)+/gi);
             for (let match of hashes) {
                 entities.hashtags.push({
                     text: match[0].slice(1),
@@ -188,7 +188,7 @@ postSchema.post('save', async (doc, next) => {
                 });
             }
             // parse username
-            let mentions = text.matchAll(/@\w+/g);
+            let mentions = text.matchAll(/@(\w|_)+/gi);
             for (let match of mentions) {
                 let screen_name = match[0].slice(1);
                 let user = await User.findOne({ screen_name });
