@@ -1,7 +1,10 @@
 const mongoose = require('mongoose')
 const { serializeUser } = require('./user.serializer')
 
-exports.serializePost = async (post, client) => {
+exports.serializePost = async (post, client, level = 0) => {
+    if (level > 1) {
+        return
+    }
     if (!post)
         return
     if (!post instanceof mongoose.Document)
@@ -13,8 +16,8 @@ exports.serializePost = async (post, client) => {
         .execPopulate()
 
     //serialize embedded posts
-    let retweeted_status = await this.serializePost(post.retweeted_status, client)
-    let quoted_status = await this.serializePost(post.quoted_status, client)
+    let retweeted_status = await this.serializePost(post.retweeted_status, client, level + 1)
+    let quoted_status = await this.serializePost(post.quoted_status, client, level + 1)
 
     //serialize user field
     if (!post.user)
@@ -38,4 +41,9 @@ exports.serializePosts = async (posts = [], client) => {
     if (!posts instanceof Array) //includes CoreDocumentArray
         throw Error("Unknown type")
     return Promise.all(posts.map(post => this.serializePost(post, client)))
+}
+
+function parseHrtimeToSeconds(hrtime) {
+    var seconds = (hrtime[0] + (hrtime[1] / 1e9)).toFixed(3)
+    return seconds
 }
