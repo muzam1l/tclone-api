@@ -42,8 +42,3 @@ exports.serializePosts = async (posts = [], client) => {
         throw Error("Unknown type")
     return Promise.all(posts.map(post => this.serializePost(post, client)))
 }
-
-function parseHrtimeToSeconds(hrtime) {
-    var seconds = (hrtime[0] + (hrtime[1] / 1e9)).toFixed(3)
-    return seconds
-}

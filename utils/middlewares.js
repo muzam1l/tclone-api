@@ -1,7 +1,7 @@
 const mongoose = require('mongoose')
 const assert = require('assert')
-var session = require('express-session');
-const MongoStore = require('connect-mongo')(session);
+var session = require('express-session')
+const MongoStore = require('connect-mongo')(session)
 
 async function ensureLoggedIn(req, res, next) {
     try {
@@ -15,8 +15,8 @@ async function ensureLoggedIn(req, res, next) {
 // does not use responce in order to work with sockets too
 // throws error or calls next 
 async function core_ensureLoggedIn(req, _, next) {
-    assert(mongoose.connection.readyState, 1);
-    let user = req.user;
+    assert(mongoose.connection.readyState, 1)
+    let user = req.user
     if (!user) { //not logged in
         throw Error("Not logged in")
     }
@@ -24,7 +24,7 @@ async function core_ensureLoggedIn(req, _, next) {
     if (!await mongoose.model('User').exists({ _id: user._id })) {
         throw Error('User Not found')
     }
-    next();
+    next()
 }
 const sessionMiddleware = session({
     secret: process.env.SESSION_SECRET || 'my shitty session secret',
@@ -37,10 +37,11 @@ const sessionMiddleware = session({
     }),
     cookie: {
         //secure: true,
+        sameSite: "strict",
         maxAge: 30 * 24 * 60 * 60 * 1000 //30 days
     }
 })
 
-exports.sessionMiddleware = sessionMiddleware;
-exports.ensureLoggedIn = ensureLoggedIn;
-exports.core_ensureLoggedIn = core_ensureLoggedIn;
+exports.sessionMiddleware = sessionMiddleware
+exports.ensureLoggedIn = ensureLoggedIn
+exports.core_ensureLoggedIn = core_ensureLoggedIn
