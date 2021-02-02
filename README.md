@@ -68,5 +68,24 @@ Posts can be searched for text they contain; user mentions they contain (@prefix
 
 Authentication is done with passport local-strategy with sessions managed server side via cookies which are also httpOnly. Along with an api end point for checking logged in session (GET /auth/login) which returns success if user is logged in, subsequent api requests return `403` to flag *inauthentication* and is also used by front end to destroy session cookie.
 
-## About project
-This is my fun little project which I developed during learning web development and is in no way complete or sophisticated. Any suggestions or even contributions are welcome, and I am sure there is lot more for me learn to make it better.
+# Deploying
+
+You will need some environment variables to run this, below is the how your environment variables should look like (`.env` file on local and heroku variables on heroku and something similar elsewhere)
+
+```bash
+MONGO_URL=<link to atlas address or wherever your mongoDB is deployed, defaults to 'mongodb://localhost/test'>
+SESSION_SECRET=<passed to session middleware, defaults to 'my shitty session secret'>
+
+# Push notifications keys. You can generate them with command "./node_modules/.bin/web-push generate-vapid-keys"
+PUBLIC_VAPID_KEY=<public vapid key which also goes into React front-end>
+PRIVATE_VAPID_KEY=<corresponding private key>
+# This must be either a URL or a 'mailto:' address.
+# For example: 'https://my-site.com/contact' or 'mailto: contact@my-site.com'
+WEB_PUSH_CONTACT="mailto: muzamilsofi@outlook.com"
+```
+
+After that just install deps and run `npm run mon` to start dev server via nodemon and `npm run start` to start server in production.
+
+## More
+
+Are you serously still reading?

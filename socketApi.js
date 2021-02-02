@@ -1,3 +1,7 @@
+/*
+* Uses socket.io 2, make according changes for >3 if you want to enable that
+------------------------------------------------------
+
 const io = require('socket.io')({
     origins: '*:*'
 });
@@ -49,3 +53,5 @@ const destroyAuthSession = socketId => {
 exports.sendData = sendData
 exports.destroyAuthSession = destroyAuthSession;
 exports.io = io;
+
+*/

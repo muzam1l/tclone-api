@@ -1,5 +1,5 @@
 const mongoose = require('mongoose')
-const { sendData: sendSocketData } = require('../socketApi')
+// const { sendData: sendSocketData } = require('../socketApi')
 const { serializeNotifs } = require('../serializers/notification.serializer')
 const webpush = require('web-push')
 
@@ -56,7 +56,7 @@ notifySchema.methods.push = async function (...notifs) {
     notifs.forEach(notif => sendPushNotif(notif, this.subscriptions, this.user_id))
     return this.save()
 }
-notifySchema.post('save', sendSocketNotifs)
+// notifySchema.post('save', sendSocketNotifs)
 
 /**
  * 
@@ -124,22 +124,24 @@ async function sendPushNotif(notif, subscriptions, user_id) {
     subscriptions.forEach(subscription =>
         webpush.sendNotification(subscription, payload)
             .catch(e => {
-                console.log(e);
+                console.log(e)
                 if (e.statusCode === 410 || e.statusCode === 404) {
                     mongoose.model('Notification').updateOne({ 'subscriptions.endpoint': subscription.endpoint }, {
                         $pull: { subscriptions: { endpoint: subscription.endpoint } }
                     }).then(res => {
-                        console.log('removed subscription from db', res);
+                        console.log('removed subscription from db', res)
                     })
                 }
             }))
 }
 
+/*
 async function sendSocketNotifs(doc) {
     let notifications = await serializeNotifs(doc)
     // notifications = notifications.filter(n => !n.read)
     // Send all
     sendSocketData('notifications', doc.user_id, notifications)
 }
+*/
 
 module.exports = mongoose.model('Notification', notifySchema)
