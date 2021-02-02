@@ -1,8 +1,12 @@
-const mongoose = require('mongoose');
+const mongoose = require('mongoose')
 
 const hashtagSchema = mongoose.Schema({
     name: String,
     tweet_volume: {
+        type: Number,
+        default: 0
+    },
+    score: {
         type: Number,
         default: 0
     }

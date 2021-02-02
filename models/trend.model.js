@@ -1,4 +1,4 @@
-const mongoose = require('mongoose');
+const mongoose = require('mongoose')
 const Hashtag = require('./hashtag.model')
 
 const trendSchema = mongoose.Schema({
@@ -29,21 +29,29 @@ const trendSchema = mongoose.Schema({
             required: true
         }
     }]
-});
-var trendInterval;
+})
+var trendInterval
 trendSchema.statics.refreshTrends = async function () {
     if (!trendInterval) {
         trendInterval = setInterval(async () => {
-            await this.refreshTrends();
-        }, 30 * 1000);
+            await this.refreshTrends()
+        }, 30 * 1000)
     }
     console.log('refreshing trends')
-    let trends = await Hashtag.find({}).sort('-updated_at -tweet_volume').limit(20);
+        ; (await Hashtag.find({})).forEach(async tag => {
+            const dt = tag.updated_at || tag.created_at
+            if (!dt || !tag.tweet_volume)
+                return
+            const score = (tag.tweet_volume * 10000000) / (Date.now() - dt)
+            tag.score = score
+            await tag.save()
+        })
+    let trends = await Hashtag.find({}).sort('-score -tweet_volume').limit(20)
     trends = trends.map(obj => ({
         name: obj.name,
         tweet_volume: obj.tweet_volume,
         query: encodeURIComponent(obj.name)
-    }));
+    }))
     if (!await this.exists({ 'locations.woeid': 1 })) {
         this.create({
             locations: [{
