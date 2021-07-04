@@ -13,12 +13,14 @@ exports.serializeUser = async (user, client = null) => {
     let friends_count = await mongoose.model('Friendship').countFriends(user._id)
     let statuses_count = await mongoose.model('User').countPosts(user._id)
     let following = await mongoose.model('Friendship').isFollowing(client && client._id, user._id)
+    const notifications_enabled_device_count = await mongoose.model('User').notificationDevices(user._id)
     return ({
         ...user,
         following,
         followers_count,
         friends_count,
-        statuses_count
+        statuses_count,
+        notifications_enabled_device_count
     })
 }
 exports.serializeUsers = async (users = [], client) => {

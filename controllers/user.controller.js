@@ -6,13 +6,13 @@ const assert = require('assert')
 
 exports.getUser = async (req, res, next) => {
     try {
-        let username = req.params.username;
-        username = filterInput(username, 'username');
+        let username = req.params.username
+        username = filterInput(username, 'username')
         let user = await User.findOne({ screen_name: username })
-        user = await serializeUser(post, req.user)
+        user = await serializeUser(user, req.user)
         res.status(200).json({
             user
-        });
+        })
     } catch (err) {
         next(err)
     }
@@ -22,7 +22,7 @@ exports.updateUser = async (req, res, next) => {
         let user = req.user
         assert.ok(user)
         let { name, description, profile_banner_color, location, website, profile_image_url_https } = req.body
-        name = filterInput(name, 'name', { identifier: 'Name' });
+        name = filterInput(name, 'name', { identifier: 'Name' })
         description = filterInput(description, 'html', { max_length: 200, identifier: 'Bio' })
         profile_banner_color = filterInput(profile_banner_color, null, { regex: /^#[0-9A-Fa-f]{3,6}$/, identifier: 'Banner color' })
         location = filterInput(location, 'name', { min_length: 0, identifier: 'Location' })
@@ -56,17 +56,17 @@ exports.updateUser = async (req, res, next) => {
 
 exports.followUser = async (req, res, next) => {
     try {
-        let username = req.params.username;
-        username = filterInput(username, 'username');
-        let user = await User.findOne({ screen_name: username }, '_id');
+        let username = req.params.username
+        username = filterInput(username, 'username')
+        let user = await User.findOne({ screen_name: username }, '_id')
         if (!user)
-            throw Error('username does not exist');
-        let req_user = await User.findById(req.user._id);
+            throw Error('username does not exist')
+        let req_user = await User.findById(req.user._id)
         let responce = await Friendship.gotFollowed(user._id, req_user._id)
         if (responce.ok && responce.nModified !== 0)
-            await req_user.follow(user._id);
+            await req_user.follow(user._id)
         else
-            throw Error('user.follow responce not ok');
+            throw Error('user.follow responce not ok')
 
         res.json({
             message: 'success'
@@ -77,15 +77,15 @@ exports.followUser = async (req, res, next) => {
 }
 exports.unFollowUser = async (req, res, next) => {
     try {
-        let username = req.params.username;
-        username = filterInput(username, 'username');
-        let user = await User.findOne({ screen_name: username }, '_id');
+        let username = req.params.username
+        username = filterInput(username, 'username')
+        let user = await User.findOne({ screen_name: username }, '_id')
         if (!user)
-            throw Error('username does not exist');
-        let req_user = await User.findById(req.user._id);
+            throw Error('username does not exist')
+        let req_user = await User.findById(req.user._id)
         let responce = await Friendship.gotUnfollowed(user._id, req_user._id)
         // if (responce.ok && responce.nModified !== 0)
-        await req_user.unfollow(user._id);
+        await req_user.unfollow(user._id)
         // else
         // throw Error('user.unfollow responce not ok');
         res.json({
@@ -97,10 +97,10 @@ exports.unFollowUser = async (req, res, next) => {
 }
 exports.getFollowers = async (req, res, next) => {
     try {
-        let username = req.params.username;
-        username = filterInput(username, 'username');
-        const p = parseInt(req.query['p']); //page/batch number
-        const s = 20; //size of page/batch
+        let username = req.params.username
+        username = filterInput(username, 'username')
+        const p = parseInt(req.query['p']) //page/batch number
+        const s = 20 //size of page/batch
 
         const user = await User.findOne({ screen_name: username }, '_id')
         if (!user)
@@ -123,11 +123,11 @@ exports.getFollowers = async (req, res, next) => {
 }
 exports.getFriends = async (req, res, next) => {
     try {
-        let username = req.params.username;
-        username = filterInput(username, 'username');
-        let p = req.query['p'];
-        p = parseInt(p); //page/batch number
-        const s = 15; //size of page/batch
+        let username = req.params.username
+        username = filterInput(username, 'username')
+        let p = req.query['p']
+        p = parseInt(p) //page/batch number
+        const s = 15 //size of page/batch
 
         const user = await User.findOne({ screen_name: username }, '_id')
         if (!user)
