@@ -6,14 +6,13 @@
  * @param {Object} opts optional setings with sig { min_length, max_length, regex }
  */
 function escapeHtml(unsafe) {
-    if (!unsafe || unsafe.length === 0)
-        return unsafe
+    if (!unsafe || unsafe.length === 0) return unsafe
     return unsafe
-        .replace(/&/g, "&amp;")
-        .replace(/</g, "&lt;")
-        .replace(/>/g, "&gt;")
-        .replace(/"/g, "&quot;")
-        .replace(/'/g, "&#039;");
+        .replace(/&/g, '&amp;')
+        .replace(/</g, '&lt;')
+        .replace(/>/g, '&gt;')
+        .replace(/"/g, '&quot;')
+        .replace(/'/g, '&#039;')
 }
 /**
  * filterInput - direct copy from fron-end with Dompurify removed
@@ -23,12 +22,11 @@ function escapeHtml(unsafe) {
  * @param type - one of 'name', 'username', 'password', 'html', 'custom'
  * @param {Object} opts optional setings with sig { min_length, max_length, regex }
  */
-function filterInput(input = '', type = 'custom', {
-    min_length: min = 1,
-    max_length: max = 70,
-    regex: reg = null,
-    identifier = null
-} = {}) {
+function filterInput(
+    input = '',
+    type = 'custom',
+    { min_length: min = 1, max_length: max = 70, regex: reg = null, identifier = null } = {}
+) {
     identifier = identifier || `input {${type}}`
     input = input.toString().trim()
     let regexes = {
@@ -41,7 +39,9 @@ function filterInput(input = '', type = 'custom', {
     }
     if (reg) {
         if (!reg.test(input)) {
-            throw Error(`${identifier} must match regex: ${reg} (range between ${min} and ${max} characters)`)
+            throw Error(
+                `${identifier} must match regex: ${reg} (range between ${min} and ${max} characters)`
+            )
         }
     }
     //else custom || html
@@ -50,9 +50,10 @@ function filterInput(input = '', type = 'custom', {
     if (input.length > max || input.length < min) {
         throw Error(`${identifier} must be minimum ${min} and maximum ${max} characters`)
     }
-    if (input.includes('\n')) // long text, strip of multiple newlines etc
+    if (input.includes('\n'))
+        // long text, strip of multiple newlines etc
         input = input.replace(/\n+/g, '\n').trim()
-    return input;
+    return input
 }
 function getRandomProfileUrl() {
     //geneartes random pic in img
@@ -72,11 +73,20 @@ function getRandomProfileUrl() {
         'spiderman-5247581.svg',
         'thor-3831290.svg',
         'tiger-308768.svg',
-        'whale-36828.svg'
+        'whale-36828.svg',
     ]
-    let img = imgs[Math.floor(Math.random() * imgs.length)];
+    let img = imgs[Math.floor(Math.random() * imgs.length)]
     return `https://tclone-api.herokuapp.com/img/${img}`
 }
 
-exports.filterInput = filterInput;
-exports.getRandomProfileUrl = getRandomProfileUrl;
+// Hot-fix, better mechanism later on
+function ensureCorrectImage(url) {
+    if (!url || !url.startsWith('https://tclone-api.herokuapp.com/img/')) {
+        return getRandomProfileUrl()
+    }
+    return url
+}
+
+exports.filterInput = filterInput
+exports.ensureCorrectImage = ensureCorrectImage
+exports.getRandomProfileUrl = getRandomProfileUrl
