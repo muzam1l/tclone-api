@@ -18,7 +18,7 @@ mongoose
         useNewUrlParser: true,
         useUnifiedTopology: true,
         useCreateIndex: true,
-        useFindAndModify: false
+        useFindAndModify: false,
     })
     .then(() => {
         console.log('connected to database!', 'pre_populating now...')
@@ -49,7 +49,12 @@ app.use(express.static(path.join(__dirname, 'public')))
 app.use(passport.initialize())
 app.use(passport.session())
 
-webpush.setVapidDetails(process.env.WEB_PUSH_CONTACT, process.env.PUBLIC_VAPID_KEY, process.env.PRIVATE_VAPID_KEY)
+console.log({ subject: process.env.WEB_PUSH_CONTACT })
+webpush.setVapidDetails(
+    process.env.WEB_PUSH_CONTACT,
+    process.env.PUBLIC_VAPID_KEY,
+    process.env.PRIVATE_VAPID_KEY
+)
 
 app.use('/api', apiRouter)
 app.use('/auth', authRouter)
