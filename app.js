@@ -18,7 +18,7 @@ mongoose
         useNewUrlParser: true,
         useUnifiedTopology: true,
         useCreateIndex: true,
-        useFindAndModify: false
+        useFindAndModify: false,
     })
     .then(() => {
         console.log('connected to database!', 'pre_populating now...')
@@ -35,10 +35,10 @@ const passport = require('./passport')
 app.use(sessionMiddleware)
 
 // create a write stream (in append mode)
-const accessLogStream = fs.createWriteStream(path.join(__dirname, 'access.log'), { flags: 'a' })
+// const accessLogStream = fs.createWriteStream(path.join(__dirname, 'access.log'), { flags: 'a' })
 
 // setup the logger
-app.use(morgan('combined', { stream: accessLogStream }))
+app.use(morgan('combined'))
 app.use(morgan('dev'))
 app.use(compression())
 app.use(express.json())
@@ -49,7 +49,11 @@ app.use(express.static(path.join(__dirname, 'public')))
 app.use(passport.initialize())
 app.use(passport.session())
 
-webpush.setVapidDetails(process.env.WEB_PUSH_CONTACT, process.env.PUBLIC_VAPID_KEY, process.env.PRIVATE_VAPID_KEY)
+webpush.setVapidDetails(
+    process.env.WEB_PUSH_CONTACT,
+    process.env.PUBLIC_VAPID_KEY,
+    process.env.PRIVATE_VAPID_KEY
+)
 
 app.use('/api', apiRouter)
 app.use('/auth', authRouter)
