@@ -14,14 +14,14 @@ const Friendship = require('../models/friendship.model')
  * All models in project
  * Used to "pre populate" some posts fetched from Twitter api, Not anymore (ˉ﹃ˉ)
  * Now this file can be used for just bootstraping, like kicking off refreshTrends interval
- * 
- * Though you can enable that in your own fork, just uncomment related sections 
+ *
+ * Though you can enable that in your own fork, just uncomment related sections
  * and paste timeline json in ./home_timeline.json
  */
 // const dummy_timeline = require('./home_timeline.json')
 
 async function pre_populate() {
-    assert(mongoose.connection.readyState, 1, 'Database not connected');
+    assert(mongoose.connection.readyState, 1, 'Database not connected')
     try {
         //Populate posts
 
@@ -42,21 +42,22 @@ async function pre_populate() {
         // update trends
 
         /*
-        * retaining it here even if it is only function in my repo
-        */
-        await Trend.refreshTrends();
+         * retaining it here even if it is only function in my repo
+         */
+        console.log('Skipped prepopulating!')
+        await Trend.refreshTrends()
     } catch (error) {
         console.error('error populating:', error)
     } finally {
-        let posts = await Post.countDocuments({});
-        console.log("posts in db:", posts);
-        let users = await User.countDocuments({});
-        console.log("users in db:", users);
+        let posts = await Post.countDocuments({})
+        console.log('posts in db:', posts)
+        let users = await User.countDocuments({})
+        console.log('users in db:', users)
     }
 }
 
 // /**
-//  * 
+//  *
 //  * @param {any} post raw json to save post in db and parse for user, retweeted/quoted status and calls itself  recursively for embedded tweets
 //  * @returns {Promise<Post>} post object in db
 //  */
