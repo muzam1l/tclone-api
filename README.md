@@ -70,7 +70,7 @@ Authentication is done with passport local-strategy with sessions managed server
 
 # Deploying
 
-You will need some environment variables to run this, below is the how your environment variables should look like (`.env` file on local and heroku variables on heroku and something similar elsewhere)
+You will need some environment variables to run this, below is the how your environment variables should look like.
 
 ```bash
 MONGO_URL=<link to atlas address or wherever your mongoDB is deployed, defaults to 'mongodb://localhost/test'>

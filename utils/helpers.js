@@ -76,12 +76,12 @@ function getRandomProfileUrl() {
         'whale-36828.svg',
     ]
     let img = imgs[Math.floor(Math.random() * imgs.length)]
-    return `https://tclone-api.herokuapp.com/img/${img}`
+    return `/img/${img}`
 }
 
 // Hot-fix, better mechanism later on
 function ensureCorrectImage(url) {
-    if (!url || !url.startsWith('https://tclone-api.herokuapp.com/img/')) {
+    if (!url || !url.startsWith('/img')) {
         return getRandomProfileUrl()
     }
     return url
