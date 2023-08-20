@@ -8,7 +8,7 @@ const Auth = require('./auth.model')
 
 const userSchema = mongoose.Schema({
     "id": { type: mongoose.Schema.Types.Long, unique: true },
-    "id_str": { type: String, unique: true }, //defualt in post('save')
+    "id_str": { type: String, unique: true }, //default in post('save')
     "name": String,
     "screen_name": {
         type: String,
@@ -16,9 +16,9 @@ const userSchema = mongoose.Schema({
         unique: true,
         index: true
     },
-    "location": { type: String, defualt: null },
+    "location": { type: String, default: null },
     "description": { type: String, default: null },
-    "url": { type: String, defualt: null },
+    "url": { type: String, default: null },
     "entities": {
         "url": {
             "urls": [
@@ -34,14 +34,14 @@ const userSchema = mongoose.Schema({
             "urls": []
         }
     },
-    "protected": { type: Boolean, defualt: false },
+    "protected": { type: Boolean, default: false },
     "followers_count": { type: Number, default: 0 },
     "friends_count": { type: Number, default: 0 },
     "listed_count": { type: Number, default: 0 },
     "created_at": { type: Date, default: Date.now() },
-    "favourites_count": { type: Number, default: 0 },
+    "favorites_count": { type: Number, default: 0 },
     "verified": { type: Boolean, default: false },
-    "statuses_count": { type: Number, defualt: 0 },
+    "statuses_count": { type: Number, default: 0 },
     "default_profile_image": { type: Boolean, default: true },
     "default_profile": { type: Boolean, default: true },
     "profile_image_url_https": { type: String, default: null },
@@ -105,7 +105,7 @@ userSchema.methods.validPassword = async function (password) {
 /**
  * updates Friendship ans User.friends_count
  * then invokes home_timeline.bulkAddPosts()
- * @returns {Object} - like { ok: 1, ...otherinfo } if succesfull in adding friends
+ * @returns {Object} - like { ok: 1, ...otherinfo } if successfully in adding friends
  */
 userSchema.methods.follow = async function (...list_id_tobe_friends) {
     let res = { ok: 0 }
@@ -188,7 +188,7 @@ userSchema.statics.getSuggestions = async function ({
     if (!user_id)
         throw Error('no user_id given')
     let { friend_ids } = await Friendship.findOne({ user_id })
-    // personalised later on
+    // personalized later on
     return this.find({
         _id: { $ne: user_id },
         _id: { $nin: friend_ids }
@@ -200,7 +200,7 @@ userSchema.statics.getSuggestions = async function ({
 async function user_genId() {
     /**
     * generates simple incrementing value
-    * last value alotted is stored in internals collection as last_id_allotted
+    * last value allotted is stored in internals collection as last_id_allotted
     */
     await internal_setting.updateOne({ ver: '1.0' }, {
         $inc: { current_user_id: 1 }

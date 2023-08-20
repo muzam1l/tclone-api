@@ -19,7 +19,7 @@ exports.createPost = async (req, res, next) => {
         let post = await Post.addOne({ user_id: user._id }, body)
         post = await serializePost(post, req.user)
         res.status(200).json({
-            'msg': 'post was succesfully added',
+            'msg': 'post was successfully added',
             post
         });
     } catch (err) {
@@ -59,7 +59,7 @@ exports.unlikePost = async (req, res, next) => {
         let user = req.user;
         let responce = await Friendship.postUnliked(user._id, { postId })
         if (responce.ok)
-            res.json({ message: "Post was unliked" })
+            res.json({ message: "Post was un-liked" })
         else
             throw Error("Error in unlike post")
     } catch (err) {
@@ -98,7 +98,7 @@ exports.unrepostPost = async (req, res, next) => {
         await doc.deleteOne()
         await Friendship.postUnreposted(user._id, { post_id: post._id })
         res.json({
-            message: "Succesfully Unreposted"
+            message: "Successfully unreposted"
         })
     } catch (err) {
         next(err)
