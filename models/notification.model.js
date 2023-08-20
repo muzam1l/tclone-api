@@ -1,6 +1,4 @@
 const mongoose = require('mongoose')
-// const { sendData: sendSocketData } = require('../socketApi')
-const { serializeNotifs } = require('../serializers/notification.serializer')
 const webpush = require('web-push')
 
 const subdocSchema = new mongoose.Schema({
@@ -45,7 +43,7 @@ notifySchema.statics.push = async function (user_id, ...notifs) {
     return doc.push(...notifs)
 }
 notifySchema.methods.push = async function (...notifs) {
-    const maxSize = 7
+    const maxSize = 20
     this.notifications.push({
         $each: notifs,
         $sort: { created_at: -1 },
