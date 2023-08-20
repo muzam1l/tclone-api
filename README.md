@@ -1,4 +1,6 @@
 
+![Azure build](https://github.com/muzam1l/tclone-api/actions/workflows/master_tclone-api.yml/badge.svg)
+
 ## API Server for [tclone](https://github.com/muzam1l/tclone)
 
 Try the app [here](https://tclone.muzam1l.com)
